@@ -2,13 +2,103 @@ package com.palmap.rssi.statistic
 
 
 import java.util.Date
-
+import com.mongodb.casbah.MongoClient
 import java.io.StringReader
 import javax.json.Json
+import com.mongodb.{BasicDBObject, ServerAddress}
+import com.palmap.rssi.common.{Common, GeneralMethods}
+import com.palmap.rssi.message.ShopStore.Visitor
+import com.palmap.rssi.message.Store.UserType
+
 import scala.collection.JavaConversions._
 import java.util.regex.Pattern
 
+import scala.collection.mutable.ListBuffer
+
 object ShopUnitFuncs {
+
+  val xmlConf = GeneralMethods.getConf(Common.SPARK_CONFIG)
+  def setUserType(partition: Iterator[(String, Array[Byte])], machineMap: Map[Int, scala.collection.mutable.Set[String]], employeeMap: Map[Int, scala.collection.mutable.Set[String]]): Iterator[(String, Array[Byte])] = {
+
+    val ret = scala.collection.mutable.Map[String, Array[Byte]]()
+
+    var currentDate = new Date()
+    val currentSec = currentDate.getTime / 1000 * 1000; //转化成秒, 封装
+    currentDate = new Date(currentSec - 30 * 1000) //需要封装
+    currentDate.setHours(0)
+    currentDate.setMinutes(0)
+    currentDate.setSeconds(0)
+    val dateTime = currentDate.getTime
+
+    val mongoServerList = xmlConf(Common.MONGO_ADDRESS_LIST)
+    val mongoServerArr = mongoServerList.split(",", -1)
+    var serverList = ListBuffer[ServerAddress]()
+    for (i <- 0 until mongoServerArr.length) {
+      val server = new ServerAddress(mongoServerArr(i), xmlConf(Common.MONGO_SERVER_PORT).toInt)
+      serverList.append(server)
+    }
+    val mongoClient = MongoClient(serverList.toList)
+    val db = mongoClient(xmlConf(Common.MONGO_DB_NAME))
+    try {
+      val visitedCollection = db(Common.MONGO_VISITED)
+      partition.foreach(record => {
+        val visitor = Visitor.newBuilder().clear().mergeFrom(record._2, 0, record._2.length)
+        val phoneMac = visitor.getPhoneMac
+        val locationId = visitor.getLocationId
+        val rssiList = visitor.getRssiList
+        var userType = 1
+        val machineMacSet = machineMap.getOrElse(locationId, null)
+        val employeeMacSet = employeeMap.getOrElse(locationId, null)
+        if (machineMacSet != null &&
+          machineMacSet.contains(phoneMac)) {
+          userType = 3
+        } else if (employeeMacSet != null &&
+          employeeMacSet.contains(phoneMac)) {
+          userType = 2
+        } else if (visitor.getRssiCount <= 40) {
+          userType = 1
+        } else {
+          userType = 0
+        }
+
+        val query = new BasicDBObject()
+        query.put(Common.MONGO_VISITED_DATE, dateTime)
+        query.put(Common.MONGO_VISITED_LOCATIONID, locationId)
+        query.put(Common.MONGO_VISITED_SCENEID, visitor.getSceneId)
+        query.put(Common.MONGO_VISITED_MAC, new String(visitor.getPhoneMac.toByteArray()))
+        val findObj = new BasicDBObject
+        findObj.put(Common.MONGO_VISITED_ISCUSTOMER, 1)
+        visitedCollection.find(query)
+        var isCustomer = false;
+        val retList = visitedCollection.find(query, findObj).toList
+        if (retList.size > 0) {
+          val ret = retList.head
+          isCustomer = ret.get(Common.MONGO_VISITED_ISCUSTOMER).toString().toBoolean
+          if (isCustomer) {
+            visitor.setUserType(UserType.CUSTOMER_VALUE)
+          } else if (!isCustomer && userType == 0) {
+            isCustomer = true
+            val update = new BasicDBObject
+            update.put(Common.MONGO_OPTION_SET, new BasicDBObject(Common.MONGO_VISITED_ISCUSTOMER, isCustomer))
+            visitedCollection.update(query, update, true)
+          } else if (!isCustomer && userType != 0) {
+            visitor.setUserType(userType)
+          }
+        } else {
+          isCustomer = (userType== UserType.CUSTOMER_VALUE)
+          val update = new BasicDBObject
+          update.put(Common.MONGO_OPTION_SET, new BasicDBObject(Common.MONGO_VISITED_ISCUSTOMER, isCustomer))
+          visitedCollection.update(query, update, true)
+          visitor.setUserType(userType)
+        }
+        ret.put(record._1, visitor.build().toByteArray())
+      })
+    } finally {
+      mongoClient.close()
+    }
+    ret.iterator
+
+  }
   def fileterVisitor(x: String, apShopMap: Map[String, Int]): Boolean = {
     var ret = false
     try {

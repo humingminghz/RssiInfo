@@ -53,7 +53,7 @@ object HistoryFuncs {
             isDateExist = latestDate >= date
           }
           if (!isDateExist)
-            historyCollection.update(query, update, true)
+            historyCollection.update(query, update,  true)
 
         })
       } finally {

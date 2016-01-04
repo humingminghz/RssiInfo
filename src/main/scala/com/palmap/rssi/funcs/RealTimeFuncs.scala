@@ -60,6 +60,7 @@ object RealTimeFuncs {
         val db = mongoClient(xmlConf(Common.MONGO_DB_NAME))
         val realTimeCollection = db(Common.MONGO_REALTIME)
         val realTimeHourCollection = db(Common.MONGO_REALTIMEHOUR)
+        //.filter(record => ((!record._2._5.isEmpty) || (!record._2._6.isEmpty)))
         partition.foreach(record => {
           val hourFormat = new SimpleDateFormat(Common.NOW_HOUR_FORMAT)
           val minuteFormat = new SimpleDateFormat(Common.NOW_MINUTE_FORMAT)
@@ -74,6 +75,8 @@ object RealTimeFuncs {
           val hourQuery = new BasicDBObject(Common.MONGO_REALTIME_HOUR, hour)
           hourQuery.put(Common.MONGO_REALTIMEHOUR_SCENEID_, record._2._2)
           hourQuery.put(Common.MONGO_REALTIMEHOUR_LOCATIONID, record._2._3)
+          //db.shop_realtime.ensureIndex({"time":1,"sceneId":1,"locationId":1})
+          //db.shop_realtime.ensureIndex({"time":1,"sceneId":1,"locationId":1})
 
           val hourUpdate = new BasicDBObject
           val minUpdate = new BasicDBObject
@@ -101,5 +104,4 @@ object RealTimeFuncs {
     }
     }
   }
-
   }

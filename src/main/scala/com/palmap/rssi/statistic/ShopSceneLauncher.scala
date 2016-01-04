@@ -87,7 +87,7 @@ object ShopSceneLauncher {
       val curVisitor = Visitor.newBuilder().clear().mergeFrom(bytesCurVisitor, 0, bytesCurVisitor.length)
       curVisitor.mergeFrom(bytesNextVisitor, 0, bytesNextVisitor.length)
       curVisitor.build().toByteArray()
-    }).mapPartitions(ShopUnitFuncs.setUserTpe(_,machineMap,employeeMap)).cache()
+    }).mapPartitions(ShopUnitFuncs.setUserType(_,machineMap,employeeMap)).cache()
     visitorRdd.print()
 
     //history
@@ -101,13 +101,13 @@ object ShopSceneLauncher {
     })
     visitorRdd.count().map(cnt => "save data to History. " + new Date()).print()
 
-    //Visited
+  /*  //Visited
     visitorRdd.foreachRDD(rdd => {
 
       VisitedFuncs.saveToMongo(rdd)
     })
     visitorRdd.count().map(cnt => "save data to mongo . " + new Date()).print()
-
+*/
     //Visited
     visitorRdd.foreachRDD(rdd => {
       var currentDate = new Date()

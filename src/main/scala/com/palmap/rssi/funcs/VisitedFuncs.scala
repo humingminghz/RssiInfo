@@ -19,8 +19,9 @@ object VisitedFuncs {
 
   val xmlConf = GeneralMethods.getConf(Common.SPARK_CONFIG)
 
-  def calcDwell(rdd: RDD[(String, Array[Byte])], machineMap: Map[Int, scala.collection.mutable.Set[String]], employeeMap: Map[Int, scala.collection.mutable.Set[String]],currentDate:Long): Unit = {
-    rdd.foreachPartition { partition => {
+  def calcDwell(rdd: RDD[(String, Array[Byte])], currentDate: Long): Unit = {
+    rdd.foreachPartition { partition =>
+    {
 
       val mongoServerList = xmlConf(Common.MONGO_ADDRESS_LIST)
       val mongoServerArr = mongoServerList.split(",", -1)
@@ -39,23 +40,21 @@ object VisitedFuncs {
           val userMac = visitor.getPhoneMac
           val sceneId = visitor.getSceneId
           val locationId = visitor.getLocationId
-          var isCustomer=(visitor.getUserType==UserType.CUSTOMER_VALUE)
-          val machineMacSet = machineMap.getOrElse(locationId, null)
-          val employeeMacSet = employeeMap.getOrElse(locationId, null)
+          // var isCustomer = (visitor.getUserType == UserType.CUSTOMER_VALUE)
 
           val historyQuery = new BasicDBObject
           historyQuery.put(Common.MONGO_VISITED_LOCATIONID, locationId)
           historyQuery.put(Common.MONGO_VISITED_SCENEID, visitor.getSceneId)
           historyQuery.put(Common.MONGO_VISITED_MAC, new String(visitor.getPhoneMac.toByteArray()))
-
+          //db.shop_history.ensureIndex({"sceneId":1,"locationId":1,"mac":1})
           val historyFind = new BasicDBObject
           historyFind.put(Common.MONGO_VISITED_TIMES, 1)
 
-         var times=0;
+          var times = 0;
           val retList = historyCollection.find(historyQuery, historyFind).toList
           if (retList.size > 0) {
             val ret = retList.head
-              times = ret.get(Common.MONGO_VISITED_TIMES).toString().toInt
+            times = ret.get(Common.MONGO_VISITED_TIMES).toString().toInt
           }
 
           //save
@@ -64,10 +63,10 @@ object VisitedFuncs {
           query.put(Common.MONGO_VISITED_LOCATIONID, locationId)
           query.put(Common.MONGO_VISITED_SCENEID, visitor.getSceneId)
           query.put(Common.MONGO_VISITED_MAC, new String(visitor.getPhoneMac.toByteArray()))
-
+          //db.shop_visited.ensureIndex({"sceneId":1,"locationId":1,"mac":1,"date":1})
           val update = new BasicDBObject
-          update.put(Common.MONGO_OPTION_SET, new BasicDBObject(Common.MONGO_VISITED_TIMES, times).append(Common.MONGO_VISITED_ISCUSTOMER,isCustomer))
-          update.put(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_VISITED_DWELL, Common.DEFAULT_UNIT_DWELL))
+          update.put(Common.MONGO_OPTION_SET, new BasicDBObject(Common.MONGO_VISITED_TIMES, times))
+          update.put(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_VISITED_DWELL, 1))
           visitedCollection.update(query, update, true)
 
         })
