@@ -8,10 +8,6 @@ public class Common {
 
 	public static final int MAC_KEY_LENGTH = 8;
 	public static final String CTRL_A = "\u0001";
-	public static final String CTRL_B = "\u0002";
-	public static final String CTRL_C = "\u0003";
-	public static final String CTRL_D = "\u0004";
-	public static final String TAB = "\t";
 	public static final char BATCH_INTERVAL_IN_MILLI_SEC = 60000;
 	public static final int MAX_TIMES = 20;
 	public static final int DAY_FORMATER = 60000 * 60 * 24;
@@ -26,7 +22,7 @@ public class Common {
 	public static final int CUSTOMER_VALUE = 0;
 	public static final int PASSENGER_VALUE = 1;
 	public static final int EMPLOYEE_VALUE = 2;
-	public static final int MACHINE_VALUE = 1;
+	public static final int MACHINE_VALUE = 3;
 
 
 

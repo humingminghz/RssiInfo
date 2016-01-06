@@ -47,12 +47,12 @@ object ShopUnitFuncs {
         val employeeMacSet = employeeMap.getOrElse(locationId, null)
         if (machineMacSet != null &&
           machineMacSet.contains(phoneMac)) {
-          userType = 3
+          userType = Common.MACHINE_VALUE
         } else if (employeeMacSet != null &&
           employeeMacSet.contains(phoneMac)) {
-          userType = 2
+          userType = Common.EMPLOYEE_VALUE
         } else if (visitor.getRssiCount <= 40) {
-          userType = 1
+          userType =Common.PASSENGER_VALUE
         } else {
           userType = 0
         }
