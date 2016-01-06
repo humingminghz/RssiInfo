@@ -1,12 +1,14 @@
 package com.palmap.rssi.statistic
 
-import scala.collection.mutable.ListBuffer
-import com.mongodb.casbah.MongoClient
-import com.mongodb.ServerAddress
 import java.text.SimpleDateFormat
-import scala.io.Source
+
+import com.mongodb.ServerAddress
+import com.mongodb.casbah.MongoClient
 import com.palmap.rssi.common.{GeneralMethods, Common}
+
 import scala.collection.JavaConversions._
+import scala.collection.mutable.ListBuffer
+import scala.io.Source
 
 object ShopSceneFuncs {
   val todayFormat = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
@@ -42,7 +44,7 @@ object ShopSceneFuncs {
   def getMacBrandMap(fileName: String): Map[String, String] = {
     var macBrandMap = scala.collection.mutable.Map[String, String]()
     Source.fromFile(fileName).getLines()
-      .filter(_.split("\u0001").length == 2) //éœ?è¦å°è£?
+      .filter(_.split("\u0001").length == 2)
       .foreach { line =>
         val arr = line.split("\u0001")
         macBrandMap(arr(0)) = arr(1)

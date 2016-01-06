@@ -2,11 +2,11 @@ package palmapmsg;
 option java_package = "com.palmap.rssi.message";
 
 message Visitor {
-  optional bytes   phone_mac    = 1; // 顾客的手机 mac 地址
-  optional int32   scene_id     = 2; // 场景id
-  optional int32   location_id  = 3; // 顾客位置
-  optional int32   user_type    = 4; // 顾客的类型
-  optional bytes   phone_brand  = 5; // 顾客手机的品牌
-  repeated uint64  time_stamp   = 6; // 时间戳
-  repeated sint32  rssi         = 7; // rssi强度
+  optional bytes   phone_mac    = 1;
+  optional int32   scene_id     = 2;
+  optional int32   location_id  = 3;
+  optional int32   user_type    = 4;
+  optional bytes   phone_brand  = 5;
+  repeated uint64  time_stamp   = 6;
+  repeated sint32  rssi         = 7;
 }

@@ -1,18 +1,14 @@
 package com.palmap.rssi.statistic
 
-
-import java.util.Date
-import com.mongodb.casbah.MongoClient
 import java.io.StringReader
+import java.util.Date
+import java.util.regex.Pattern
 import javax.json.Json
+
+import com.mongodb.casbah.MongoClient
 import com.mongodb.{BasicDBObject, ServerAddress}
 import com.palmap.rssi.common.{Common, GeneralMethods}
 import com.palmap.rssi.message.ShopStore.Visitor
-import com.palmap.rssi.message.Store.UserType
-
-import scala.collection.JavaConversions._
-import java.util.regex.Pattern
-
 import scala.collection.mutable.ListBuffer
 
 object ShopUnitFuncs {
@@ -23,8 +19,8 @@ object ShopUnitFuncs {
     val ret = scala.collection.mutable.Map[String, Array[Byte]]()
 
     var currentDate = new Date()
-    val currentSec = currentDate.getTime / 1000 * 1000; //转化成秒, 封装
-    currentDate = new Date(currentSec - 30 * 1000) //需要封装
+    val currentSec = currentDate.getTime / 1000 * 1000
+    currentDate = new Date(currentSec - 30 * 1000)
     currentDate.setHours(0)
     currentDate.setMinutes(0)
     currentDate.setSeconds(0)
@@ -40,10 +36,10 @@ object ShopUnitFuncs {
     val mongoClient = MongoClient(serverList.toList)
     val db = mongoClient(xmlConf(Common.MONGO_DB_NAME))
     try {
-      val visitedCollection = db(Common.MONGO_VISITED)
+      val visitedCollection = db(Common.MONGO_COLLECTION_VISITED)
       partition.foreach(record => {
         val visitor = Visitor.newBuilder().clear().mergeFrom(record._2, 0, record._2.length)
-        val phoneMac = visitor.getPhoneMac
+        val phoneMac =  new String(visitor.getPhoneMac.toByteArray())
         val locationId = visitor.getLocationId
         val rssiList = visitor.getRssiList
         var userType = 1
@@ -67,27 +63,28 @@ object ShopUnitFuncs {
         query.put(Common.MONGO_VISITED_SCENEID, visitor.getSceneId)
         query.put(Common.MONGO_VISITED_MAC, new String(visitor.getPhoneMac.toByteArray()))
         val findObj = new BasicDBObject
-        findObj.put(Common.MONGO_VISITED_ISCUSTOMER, 1)
+        findObj.put(Common.MONGO_VISITED_USERTYPE, 1)
         visitedCollection.find(query)
-        var isCustomer = false;
+
         val retList = visitedCollection.find(query, findObj).toList
         if (retList.size > 0) {
           val ret = retList.head
-          isCustomer = ret.get(Common.MONGO_VISITED_ISCUSTOMER).toString().toBoolean
+          var isCustomer = false;
+          val typeUser = ret.get(Common.MONGO_VISITED_USERTYPE).toString().toInt
+          isCustomer = (typeUser== Common.CUSTOMER_VALUE)
           if (isCustomer) {
-            visitor.setUserType(UserType.CUSTOMER_VALUE)
+            visitor.setUserType(Common.CUSTOMER_VALUE)
           } else if (!isCustomer && userType == 0) {
             isCustomer = true
             val update = new BasicDBObject
-            update.put(Common.MONGO_OPTION_SET, new BasicDBObject(Common.MONGO_VISITED_ISCUSTOMER, isCustomer))
+            update.put(Common.MONGO_OPTION_SET, new BasicDBObject(Common.MONGO_VISITED_USERTYPE, userType))
             visitedCollection.update(query, update, true)
           } else if (!isCustomer && userType != 0) {
             visitor.setUserType(userType)
           }
         } else {
-          isCustomer = (userType== UserType.CUSTOMER_VALUE)
           val update = new BasicDBObject
-          update.put(Common.MONGO_OPTION_SET, new BasicDBObject(Common.MONGO_VISITED_ISCUSTOMER, isCustomer))
+          update.put(Common.MONGO_OPTION_SET, new BasicDBObject(Common.MONGO_VISITED_USERTYPE, userType))
           visitedCollection.update(query, update, true)
           visitor.setUserType(userType)
         }
@@ -123,11 +120,11 @@ object ShopUnitFuncs {
             val todayFormat = ShopSceneFuncs.todayFormat
             val currentDate = new Date()
             val currentTs = currentDate.getTime
-            val todayDate = todayFormat.format(currentDate) //获取今天零点零时零分零秒时间戳
+            val todayDate = todayFormat.format(currentDate)
             val todayTs = todayFormat.parse(todayDate).getTime
             val nextDayTs = todayTs + 30 * 1000
             if (currentTs > nextDayTs && currentTs < nextDayTs + 30 * 1000) {
-              ret = (timeStamp.toLong) >= todayTs //需要封装， 乘1000
+              ret = (timeStamp.toLong) >= todayTs
             } else {
               ret = true
             }

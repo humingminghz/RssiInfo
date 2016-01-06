@@ -3,11 +3,10 @@ package com.palmap.rssi.funcs
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import com.mongodb.{BasicDBObject, ServerAddress}
 import com.mongodb.casbah.MongoClient
+import com.mongodb.{BasicDBObject, ServerAddress}
 import com.palmap.rssi.common.{Common, GeneralMethods}
 import com.palmap.rssi.message.ShopStore.Visitor
-import com.palmap.rssi.message.Store.UserType
 import org.apache.spark.rdd.RDD
 
 import scala.collection.mutable.ListBuffer
@@ -44,7 +43,7 @@ object RealTimeFuncs {
 
 
   def saveMacs(rdd: RDD[(String, (Long, Int, Int, Int, List[String]))]): Unit = {
-    //(currentTime,sceneId,locationId,userType,cusMacList,passingMacList)
+    //(currentTime,sceneId,locationId,userType,macList)
     rdd.foreachPartition { partition =>
     {
       val mongoServerList = xmlConf(Common.MONGO_ADDRESS_LIST)
@@ -58,10 +57,9 @@ object RealTimeFuncs {
 
       try {
         val db = mongoClient(xmlConf(Common.MONGO_DB_NAME))
-        val realTimeCollection = db(Common.MONGO_REALTIME)
-        val realTimeHourCollection = db(Common.MONGO_REALTIMEHOUR)
-        //.filter(record => ((!record._2._5.isEmpty) || (!record._2._6.isEmpty)))
-        partition.foreach(record => {
+        val realTimeCollection = db(Common.MONGO_COLLECTION_REALTIME)
+        val realTimeHourCollection = db(Common.MONGO_COLLECTION_REALTIME_HOUR)
+        partition.filter(record => !record._2._5.isEmpty).foreach(record => {
           val hourFormat = new SimpleDateFormat(Common.NOW_HOUR_FORMAT)
           val minuteFormat = new SimpleDateFormat(Common.NOW_MINUTE_FORMAT)
           var currentDate = new Date(record._2._1)
@@ -71,31 +69,25 @@ object RealTimeFuncs {
           val minQuery = new BasicDBObject(Common.MONGO_REALTIME_TIME, createTime)
           minQuery.put(Common.MONGO_REALTIME_SCENEID, record._2._2)
           minQuery.put(Common.MONGO_REALTIME_LOCATIONID, record._2._3)
+          minQuery.put(Common.MONGO_REALTIME_USERTYPE, record._2._4)
 
           val hourQuery = new BasicDBObject(Common.MONGO_REALTIME_HOUR, hour)
-          hourQuery.put(Common.MONGO_REALTIMEHOUR_SCENEID_, record._2._2)
-          hourQuery.put(Common.MONGO_REALTIMEHOUR_LOCATIONID, record._2._3)
-          //db.shop_realtime.ensureIndex({"time":1,"sceneId":1,"locationId":1})
-          //db.shop_realtime.ensureIndex({"time":1,"sceneId":1,"locationId":1})
+          hourQuery.put(Common.MONGO_REALTIME_HOUR_SCENEID, record._2._2)
+          hourQuery.put(Common.MONGO_REALTIME_HOUR_LOCATIONID, record._2._3)
+          hourQuery.put(Common.MONGO_REALTIME_HOUR_USERTYPE, record._2._4)
+          //db.shop_realtime.ensureIndex({"time":1,"sceneId":1,"locationId":1,"userType":1})
+          //db.shop_realtime.ensureIndex({"time":1,"sceneId":1,"locationId":1,"userType":1})
 
           val hourUpdate = new BasicDBObject
           val minUpdate = new BasicDBObject
-          if (!record._2._5.isEmpty) {
-            val macList = record._2._5
-            val userType = record._2._4
-            if (userType == UserType.CUSTOMER_VALUE) {
-              minUpdate.put(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_REALTIME_CUSMAC_SUM, macList.size))
-              minUpdate.put(Common.MONGO_OPTION_PUSH, new BasicDBObject(Common.MONGO_REALTIME_CUSMACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
-              hourUpdate.put(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_REALTIME_CUSMACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
-            } else if (userType == UserType.PASSENGER_VALUE) {
-              minUpdate.put(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_REALTIME_PASSINGMAC_SUM, macList.size))
-              minUpdate.put(Common.MONGO_OPTION_PUSH, new BasicDBObject(Common.MONGO_REALTIME_PASSINGMACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
-              hourUpdate.put(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_REALTIME_PASSINGMACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
-            }
-          }
 
-          realTimeCollection.update(minQuery, minUpdate, upsert = true)
-          realTimeHourCollection.update(hourQuery, hourUpdate, upsert = true)
+          val macList = record._2._5
+          minUpdate.put(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_REALTIME_MACSUM, macList.size))
+          minUpdate.put(Common.MONGO_OPTION_PUSH, new BasicDBObject(Common.MONGO_REALTIME_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
+          hourUpdate.put(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_REALTIMEHOUR_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
+
+          realTimeCollection.update(minQuery, minUpdate, true)
+          realTimeHourCollection.update(hourQuery, hourUpdate,true)
 
         })
       } finally {
@@ -104,4 +96,4 @@ object RealTimeFuncs {
     }
     }
   }
-  }
+}

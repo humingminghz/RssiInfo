@@ -23,6 +23,14 @@ public class Common {
 	public static final String TODAY_FIRST_TS_FORMAT = "yyyy-MM-dd 00:00:00";
 
 
+	public static final int CUSTOMER_VALUE = 0;
+	public static final int PASSENGER_VALUE = 1;
+	public static final int EMPLOYEE_VALUE = 2;
+	public static final int MACHINE_VALUE = 1;
+
+
+
+
 	public static final String SPARK_CONFIG = "sparkRssiInfo.xml";
 	public static final String MONGO_DB_NAME = "mongo.db.name";
 	public static final String MONGO_ADDRESS_LIST = "mongo.address.list";
@@ -40,7 +48,7 @@ public class Common {
 	public static final String MONGO_OPTION_ADDTOSET  = "$addToSet";
 
 
-	public static final String MONGO_VISITED = "shop_visited";
+	public static final String MONGO_COLLECTION_VISITED = "shop_visited";
 	public static final String MONGO_VISITED_DATE = "date";
 	public static final String MONGO_VISITED_LOCATIONID = "locationId";
 	public static final String MONGO_VISITED_SCENEID = "sceneId";
@@ -48,30 +56,30 @@ public class Common {
 	//public static final String MONGO_VISITED_FREQUENCY = "frequency";
 	public static final String MONGO_VISITED_DWELL = "dwell";
 	public static final String MONGO_VISITED_TIMES= "times";
-	public static final String MONGO_VISITED_ISCUSTOMER= "isCustomer: ";
+	public static final String MONGO_VISITED_USERTYPE= "userType";
+	public static final String MONGO_VISITED_PHONEBRAND= "brand";
 
-	public static final String MONGO_HISTORY = "shop_history";
+	public static final String MONGO_COLLECTION_HISTORY = "shop_history";
 	public static final String MONGO_HISTORY_LOCATIONID = "locationId";
 	public static final String MONGO_HISTORY_SCENEID = "sceneId";
 	public static final String MONGO_HISTORY_MAC = "mac";
 	public static final String MONGO_HISTORY_TIMES = "times";
 	public static final String MONGO_HISTORY_DAYS = "days";
 
-	public static final String MONGO_REALTIME = "shop_realtime";
+	public static final String MONGO_COLLECTION_REALTIME = "shop_realtime";
 	public static final String MONGO_REALTIME_LOCATIONID = "locationId";
 	public static final String MONGO_REALTIME_SCENEID = "sceneId";
 	public static final String MONGO_REALTIME_TIME = "time";
-	public static final String MONGO_REALTIME_CUSMACS = "cusMacs";
-	public static final String MONGO_REALTIME_PASSINGMACS= "passingMacs";
-	public static final String MONGO_REALTIME_CUSMAC_SUM = "cusMacSum";
-	public static final String MONGO_REALTIME_PASSINGMAC_SUM = "passingMacSum";
+	public static final String MONGO_REALTIME_USERTYPE= "userType";
+	public static final String MONGO_REALTIME_MACS = "macs";
+	public static final String MONGO_REALTIME_MACSUM = "macSum";
 
-	public static final String MONGO_REALTIMEHOUR= "shop_realtime_hour";
-	public static final String MONGO_REALTIMEHOUR_LOCATIONID  = "locationId";
-	public static final String MONGO_REALTIMEHOUR_SCENEID_ = "sceneId";
+	public static final String MONGO_COLLECTION_REALTIME_HOUR= "shop_realtime_hour";
+	public static final String MONGO_REALTIME_HOUR_LOCATIONID  = "locationId";
+	public static final String MONGO_REALTIME_HOUR_SCENEID = "sceneId";
 	public static final String MONGO_REALTIME_HOUR = "hour";
-	public static final String MONGO_REALTIMEHOUR_CUSMACS = "cusMacs";
-	public static final String MONGO_REALTIMEHOUR_PASSINGMACS= "passingMacs";
+	public static final String MONGO_REALTIME_HOUR_USERTYPE= "userType";
+	public static final String MONGO_REALTIMEHOUR_MACS = "macs";
 
 	public static final String MONGO_STORE_APMAC_RELATION= "store_apmac_relation";
 	public static final String MONGO_USER_TYPE_INFO= "user_type_info";

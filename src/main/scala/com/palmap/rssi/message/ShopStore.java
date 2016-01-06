@@ -16,7 +16,6 @@ public final class ShopStore {
      * <code>optional bytes phone_mac = 1;</code>
      *
      * <pre>
-     * 顾客的手机 mac 地址
      * </pre>
      */
     boolean hasPhoneMac();
@@ -24,7 +23,6 @@ public final class ShopStore {
      * <code>optional bytes phone_mac = 1;</code>
      *
      * <pre>
-     * 顾客的手机 mac 地址
      * </pre>
      */
     com.google.protobuf.ByteString getPhoneMac();
@@ -33,7 +31,6 @@ public final class ShopStore {
      * <code>optional int32 scene_id = 2;</code>
      *
      * <pre>
-     * 场景id
      * </pre>
      */
     boolean hasSceneId();
@@ -41,7 +38,6 @@ public final class ShopStore {
      * <code>optional int32 scene_id = 2;</code>
      *
      * <pre>
-     * 场景id
      * </pre>
      */
     int getSceneId();
@@ -50,7 +46,6 @@ public final class ShopStore {
      * <code>optional int32 location_id = 3;</code>
      *
      * <pre>
-     * 顾客位置
      * </pre>
      */
     boolean hasLocationId();
@@ -58,7 +53,6 @@ public final class ShopStore {
      * <code>optional int32 location_id = 3;</code>
      *
      * <pre>
-     * 顾客位置
      * </pre>
      */
     int getLocationId();
@@ -67,7 +61,6 @@ public final class ShopStore {
      * <code>optional int32 user_type = 4;</code>
      *
      * <pre>
-     * 顾客的类型
      * </pre>
      */
     boolean hasUserType();
@@ -75,7 +68,6 @@ public final class ShopStore {
      * <code>optional int32 user_type = 4;</code>
      *
      * <pre>
-     * 顾客的类型
      * </pre>
      */
     int getUserType();
@@ -84,7 +76,6 @@ public final class ShopStore {
      * <code>optional bytes phone_brand = 5;</code>
      *
      * <pre>
-     * 顾客手机的品牌
      * </pre>
      */
     boolean hasPhoneBrand();
@@ -92,7 +83,6 @@ public final class ShopStore {
      * <code>optional bytes phone_brand = 5;</code>
      *
      * <pre>
-     * 顾客手机的品牌
      * </pre>
      */
     com.google.protobuf.ByteString getPhoneBrand();
@@ -101,15 +91,14 @@ public final class ShopStore {
      * <code>repeated uint64 time_stamp = 6;</code>
      *
      * <pre>
-     * 时间戳
+     * ????
      * </pre>
      */
-    java.util.List<java.lang.Long> getTimeStampList();
+    java.util.List<Long> getTimeStampList();
     /**
      * <code>repeated uint64 time_stamp = 6;</code>
      *
      * <pre>
-     * 时间戳
      * </pre>
      */
     int getTimeStampCount();
@@ -117,7 +106,6 @@ public final class ShopStore {
      * <code>repeated uint64 time_stamp = 6;</code>
      *
      * <pre>
-     * 时间戳
      * </pre>
      */
     long getTimeStamp(int index);
@@ -126,15 +114,14 @@ public final class ShopStore {
      * <code>repeated sint32 rssi = 7;</code>
      *
      * <pre>
-     * rssi强度
+     * rssi???
      * </pre>
      */
-    java.util.List<java.lang.Integer> getRssiList();
+    java.util.List<Integer> getRssiList();
     /**
      * <code>repeated sint32 rssi = 7;</code>
      *
      * <pre>
-     * rssi强度
      * </pre>
      */
     int getRssiCount();
@@ -142,7 +129,6 @@ public final class ShopStore {
      * <code>repeated sint32 rssi = 7;</code>
      *
      * <pre>
-     * rssi强度
      * </pre>
      */
     int getRssi(int index);
@@ -175,7 +161,7 @@ public final class ShopStore {
     }
 
     private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
+    @Override
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
@@ -230,7 +216,7 @@ public final class ShopStore {
             }
             case 48: {
               if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
-                timeStamp_ = new java.util.ArrayList<java.lang.Long>();
+                timeStamp_ = new java.util.ArrayList<Long>();
                 mutable_bitField0_ |= 0x00000020;
               }
               timeStamp_.add(input.readUInt64());
@@ -240,7 +226,7 @@ public final class ShopStore {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
               if (!((mutable_bitField0_ & 0x00000020) == 0x00000020) && input.getBytesUntilLimit() > 0) {
-                timeStamp_ = new java.util.ArrayList<java.lang.Long>();
+                timeStamp_ = new java.util.ArrayList<Long>();
                 mutable_bitField0_ |= 0x00000020;
               }
               while (input.getBytesUntilLimit() > 0) {
@@ -251,7 +237,7 @@ public final class ShopStore {
             }
             case 56: {
               if (!((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
-                rssi_ = new java.util.ArrayList<java.lang.Integer>();
+                rssi_ = new java.util.ArrayList<Integer>();
                 mutable_bitField0_ |= 0x00000040;
               }
               rssi_.add(input.readSInt32());
@@ -261,7 +247,7 @@ public final class ShopStore {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
               if (!((mutable_bitField0_ & 0x00000040) == 0x00000040) && input.getBytesUntilLimit() > 0) {
-                rssi_ = new java.util.ArrayList<java.lang.Integer>();
+                rssi_ = new java.util.ArrayList<Integer>();
                 mutable_bitField0_ |= 0x00000040;
               }
               while (input.getBytesUntilLimit() > 0) {
@@ -310,7 +296,7 @@ public final class ShopStore {
               }
             };
 
-    @java.lang.Override
+    @Override
     public com.google.protobuf.Parser<Visitor> getParserForType() {
       return PARSER;
     }
@@ -322,7 +308,6 @@ public final class ShopStore {
      * <code>optional bytes phone_mac = 1;</code>
      *
      * <pre>
-     * 顾客的手机 mac 地址
      * </pre>
      */
     public boolean hasPhoneMac() {
@@ -332,7 +317,7 @@ public final class ShopStore {
      * <code>optional bytes phone_mac = 1;</code>
      *
      * <pre>
-     * 顾客的手机 mac 地址
+     * ??????? mac ???
      * </pre>
      */
     public com.google.protobuf.ByteString getPhoneMac() {
@@ -345,7 +330,6 @@ public final class ShopStore {
      * <code>optional int32 scene_id = 2;</code>
      *
      * <pre>
-     * 场景id
      * </pre>
      */
     public boolean hasSceneId() {
@@ -355,7 +339,6 @@ public final class ShopStore {
      * <code>optional int32 scene_id = 2;</code>
      *
      * <pre>
-     * 场景id
      * </pre>
      */
     public int getSceneId() {
@@ -368,7 +351,6 @@ public final class ShopStore {
      * <code>optional int32 location_id = 3;</code>
      *
      * <pre>
-     * 顾客位置
      * </pre>
      */
     public boolean hasLocationId() {
@@ -378,7 +360,6 @@ public final class ShopStore {
      * <code>optional int32 location_id = 3;</code>
      *
      * <pre>
-     * 顾客位置
      * </pre>
      */
     public int getLocationId() {
@@ -391,7 +372,6 @@ public final class ShopStore {
      * <code>optional int32 user_type = 4;</code>
      *
      * <pre>
-     * 顾客的类型
      * </pre>
      */
     public boolean hasUserType() {
@@ -401,7 +381,6 @@ public final class ShopStore {
      * <code>optional int32 user_type = 4;</code>
      *
      * <pre>
-     * 顾客的类型
      * </pre>
      */
     public int getUserType() {
@@ -414,7 +393,6 @@ public final class ShopStore {
      * <code>optional bytes phone_brand = 5;</code>
      *
      * <pre>
-     * 顾客手机的品牌
      * </pre>
      */
     public boolean hasPhoneBrand() {
@@ -423,8 +401,7 @@ public final class ShopStore {
     /**
      * <code>optional bytes phone_brand = 5;</code>
      *
-     * <pre>
-     * 顾客手机的品牌
+     * <pre
      * </pre>
      */
     public com.google.protobuf.ByteString getPhoneBrand() {
@@ -432,15 +409,14 @@ public final class ShopStore {
     }
 
     public static final int TIME_STAMP_FIELD_NUMBER = 6;
-    private java.util.List<java.lang.Long> timeStamp_;
+    private java.util.List<Long> timeStamp_;
     /**
      * <code>repeated uint64 time_stamp = 6;</code>
      *
      * <pre>
-     * 时间戳
      * </pre>
      */
-    public java.util.List<java.lang.Long>
+    public java.util.List<Long>
     getTimeStampList() {
       return timeStamp_;
     }
@@ -448,7 +424,6 @@ public final class ShopStore {
      * <code>repeated uint64 time_stamp = 6;</code>
      *
      * <pre>
-     * 时间戳
      * </pre>
      */
     public int getTimeStampCount() {
@@ -458,7 +433,6 @@ public final class ShopStore {
      * <code>repeated uint64 time_stamp = 6;</code>
      *
      * <pre>
-     * 时间戳
      * </pre>
      */
     public long getTimeStamp(int index) {
@@ -466,15 +440,14 @@ public final class ShopStore {
     }
 
     public static final int RSSI_FIELD_NUMBER = 7;
-    private java.util.List<java.lang.Integer> rssi_;
+    private java.util.List<Integer> rssi_;
     /**
      * <code>repeated sint32 rssi = 7;</code>
      *
      * <pre>
-     * rssi强度
      * </pre>
      */
-    public java.util.List<java.lang.Integer>
+    public java.util.List<Integer>
     getRssiList() {
       return rssi_;
     }
@@ -482,7 +455,6 @@ public final class ShopStore {
      * <code>repeated sint32 rssi = 7;</code>
      *
      * <pre>
-     * rssi强度
      * </pre>
      */
     public int getRssiCount() {
@@ -492,7 +464,6 @@ public final class ShopStore {
      * <code>repeated sint32 rssi = 7;</code>
      *
      * <pre>
-     * rssi强度
      * </pre>
      */
     public int getRssi(int index) {
@@ -595,8 +566,8 @@ public final class ShopStore {
     }
 
     private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
+    @Override
+    protected Object writeReplace()
             throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
@@ -661,7 +632,7 @@ public final class ShopStore {
     }
     public Builder toBuilder() { return newBuilder(this); }
 
-    @java.lang.Override
+    @Override
     protected Builder newBuilderForType(
             com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
@@ -865,7 +836,6 @@ public final class ShopStore {
        * <code>optional bytes phone_mac = 1;</code>
        *
        * <pre>
-       * 顾客的手机 mac 地址
        * </pre>
        */
       public boolean hasPhoneMac() {
@@ -875,7 +845,6 @@ public final class ShopStore {
        * <code>optional bytes phone_mac = 1;</code>
        *
        * <pre>
-       * 顾客的手机 mac 地址
        * </pre>
        */
       public com.google.protobuf.ByteString getPhoneMac() {
@@ -885,7 +854,6 @@ public final class ShopStore {
        * <code>optional bytes phone_mac = 1;</code>
        *
        * <pre>
-       * 顾客的手机 mac 地址
        * </pre>
        */
       public Builder setPhoneMac(com.google.protobuf.ByteString value) {
@@ -900,8 +868,6 @@ public final class ShopStore {
       /**
        * <code>optional bytes phone_mac = 1;</code>
        *
-       * <pre>
-       * 顾客的手机 mac 地址
        * </pre>
        */
       public Builder clearPhoneMac() {
@@ -916,7 +882,7 @@ public final class ShopStore {
        * <code>optional int32 scene_id = 2;</code>
        *
        * <pre>
-       * 场景id
+       * ????id
        * </pre>
        */
       public boolean hasSceneId() {
@@ -926,7 +892,6 @@ public final class ShopStore {
        * <code>optional int32 scene_id = 2;</code>
        *
        * <pre>
-       * 场景id
        * </pre>
        */
       public int getSceneId() {
@@ -935,8 +900,6 @@ public final class ShopStore {
       /**
        * <code>optional int32 scene_id = 2;</code>
        *
-       * <pre>
-       * 场景id
        * </pre>
        */
       public Builder setSceneId(int value) {
@@ -949,8 +912,6 @@ public final class ShopStore {
        * <code>optional int32 scene_id = 2;</code>
        *
        * <pre>
-       * 场景id
-       * </pre>
        */
       public Builder clearSceneId() {
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -964,7 +925,6 @@ public final class ShopStore {
        * <code>optional int32 location_id = 3;</code>
        *
        * <pre>
-       * 顾客位置
        * </pre>
        */
       public boolean hasLocationId() {
@@ -973,8 +933,6 @@ public final class ShopStore {
       /**
        * <code>optional int32 location_id = 3;</code>
        *
-       * <pre>
-       * 顾客位置
        * </pre>
        */
       public int getLocationId() {
@@ -984,7 +942,6 @@ public final class ShopStore {
        * <code>optional int32 location_id = 3;</code>
        *
        * <pre>
-       * 顾客位置
        * </pre>
        */
       public Builder setLocationId(int value) {
@@ -996,8 +953,6 @@ public final class ShopStore {
       /**
        * <code>optional int32 location_id = 3;</code>
        *
-       * <pre>
-       * 顾客位置
        * </pre>
        */
       public Builder clearLocationId() {
@@ -1012,7 +967,6 @@ public final class ShopStore {
        * <code>optional int32 user_type = 4;</code>
        *
        * <pre>
-       * 顾客的类型
        * </pre>
        */
       public boolean hasUserType() {
@@ -1022,7 +976,6 @@ public final class ShopStore {
        * <code>optional int32 user_type = 4;</code>
        *
        * <pre>
-       * 顾客的类型
        * </pre>
        */
       public int getUserType() {
@@ -1032,7 +985,6 @@ public final class ShopStore {
        * <code>optional int32 user_type = 4;</code>
        *
        * <pre>
-       * 顾客的类型
        * </pre>
        */
       public Builder setUserType(int value) {
@@ -1045,7 +997,6 @@ public final class ShopStore {
        * <code>optional int32 user_type = 4;</code>
        *
        * <pre>
-       * 顾客的类型
        * </pre>
        */
       public Builder clearUserType() {
@@ -1060,7 +1011,6 @@ public final class ShopStore {
        * <code>optional bytes phone_brand = 5;</code>
        *
        * <pre>
-       * 顾客手机的品牌
        * </pre>
        */
       public boolean hasPhoneBrand() {
@@ -1070,7 +1020,6 @@ public final class ShopStore {
        * <code>optional bytes phone_brand = 5;</code>
        *
        * <pre>
-       * 顾客手机的品牌
        * </pre>
        */
       public com.google.protobuf.ByteString getPhoneBrand() {
@@ -1080,7 +1029,6 @@ public final class ShopStore {
        * <code>optional bytes phone_brand = 5;</code>
        *
        * <pre>
-       * 顾客手机的品牌
        * </pre>
        */
       public Builder setPhoneBrand(com.google.protobuf.ByteString value) {
@@ -1096,7 +1044,6 @@ public final class ShopStore {
        * <code>optional bytes phone_brand = 5;</code>
        *
        * <pre>
-       * 顾客手机的品牌
        * </pre>
        */
       public Builder clearPhoneBrand() {
@@ -1106,10 +1053,10 @@ public final class ShopStore {
         return this;
       }
 
-      private java.util.List<java.lang.Long> timeStamp_ = java.util.Collections.emptyList();
+      private java.util.List<Long> timeStamp_ = java.util.Collections.emptyList();
       private void ensureTimeStampIsMutable() {
         if (!((bitField0_ & 0x00000020) == 0x00000020)) {
-          timeStamp_ = new java.util.ArrayList<java.lang.Long>(timeStamp_);
+          timeStamp_ = new java.util.ArrayList<Long>(timeStamp_);
           bitField0_ |= 0x00000020;
         }
       }
@@ -1117,10 +1064,9 @@ public final class ShopStore {
        * <code>repeated uint64 time_stamp = 6;</code>
        *
        * <pre>
-       * 时间戳
        * </pre>
        */
-      public java.util.List<java.lang.Long>
+      public java.util.List<Long>
       getTimeStampList() {
         return java.util.Collections.unmodifiableList(timeStamp_);
       }
@@ -1128,7 +1074,6 @@ public final class ShopStore {
        * <code>repeated uint64 time_stamp = 6;</code>
        *
        * <pre>
-       * 时间戳
        * </pre>
        */
       public int getTimeStampCount() {
@@ -1138,7 +1083,6 @@ public final class ShopStore {
        * <code>repeated uint64 time_stamp = 6;</code>
        *
        * <pre>
-       * 时间戳
        * </pre>
        */
       public long getTimeStamp(int index) {
@@ -1148,7 +1092,6 @@ public final class ShopStore {
        * <code>repeated uint64 time_stamp = 6;</code>
        *
        * <pre>
-       * 时间戳
        * </pre>
        */
       public Builder setTimeStamp(
@@ -1162,7 +1105,6 @@ public final class ShopStore {
        * <code>repeated uint64 time_stamp = 6;</code>
        *
        * <pre>
-       * 时间戳
        * </pre>
        */
       public Builder addTimeStamp(long value) {
@@ -1175,11 +1117,10 @@ public final class ShopStore {
        * <code>repeated uint64 time_stamp = 6;</code>
        *
        * <pre>
-       * 时间戳
        * </pre>
        */
       public Builder addAllTimeStamp(
-              java.lang.Iterable<? extends java.lang.Long> values) {
+              Iterable<? extends Long> values) {
         ensureTimeStampIsMutable();
         com.google.protobuf.AbstractMessageLite.Builder.addAll(
                 values, timeStamp_);
@@ -1190,7 +1131,6 @@ public final class ShopStore {
        * <code>repeated uint64 time_stamp = 6;</code>
        *
        * <pre>
-       * 时间戳
        * </pre>
        */
       public Builder clearTimeStamp() {
@@ -1200,10 +1140,10 @@ public final class ShopStore {
         return this;
       }
 
-      private java.util.List<java.lang.Integer> rssi_ = java.util.Collections.emptyList();
+      private java.util.List<Integer> rssi_ = java.util.Collections.emptyList();
       private void ensureRssiIsMutable() {
         if (!((bitField0_ & 0x00000040) == 0x00000040)) {
-          rssi_ = new java.util.ArrayList<java.lang.Integer>(rssi_);
+          rssi_ = new java.util.ArrayList<Integer>(rssi_);
           bitField0_ |= 0x00000040;
         }
       }
@@ -1211,10 +1151,9 @@ public final class ShopStore {
        * <code>repeated sint32 rssi = 7;</code>
        *
        * <pre>
-       * rssi强度
        * </pre>
        */
-      public java.util.List<java.lang.Integer>
+      public java.util.List<Integer>
       getRssiList() {
         return java.util.Collections.unmodifiableList(rssi_);
       }
@@ -1222,7 +1161,6 @@ public final class ShopStore {
        * <code>repeated sint32 rssi = 7;</code>
        *
        * <pre>
-       * rssi强度
        * </pre>
        */
       public int getRssiCount() {
@@ -1232,7 +1170,6 @@ public final class ShopStore {
        * <code>repeated sint32 rssi = 7;</code>
        *
        * <pre>
-       * rssi强度
        * </pre>
        */
       public int getRssi(int index) {
@@ -1242,7 +1179,6 @@ public final class ShopStore {
        * <code>repeated sint32 rssi = 7;</code>
        *
        * <pre>
-       * rssi强度
        * </pre>
        */
       public Builder setRssi(
@@ -1256,7 +1192,6 @@ public final class ShopStore {
        * <code>repeated sint32 rssi = 7;</code>
        *
        * <pre>
-       * rssi强度
        * </pre>
        */
       public Builder addRssi(int value) {
@@ -1269,11 +1204,10 @@ public final class ShopStore {
        * <code>repeated sint32 rssi = 7;</code>
        *
        * <pre>
-       * rssi强度
        * </pre>
        */
       public Builder addAllRssi(
-              java.lang.Iterable<? extends java.lang.Integer> values) {
+              Iterable<? extends Integer> values) {
         ensureRssiIsMutable();
         com.google.protobuf.AbstractMessageLite.Builder.addAll(
                 values, rssi_);
@@ -1284,7 +1218,6 @@ public final class ShopStore {
        * <code>repeated sint32 rssi = 7;</code>
        *
        * <pre>
-       * rssi强度
        * </pre>
        */
       public Builder clearRssi() {
@@ -1318,7 +1251,7 @@ public final class ShopStore {
   private static com.google.protobuf.Descriptors.FileDescriptor
           descriptor;
   static {
-    java.lang.String[] descriptorData = {
+    String[] descriptorData = {
             "\n\017ShopStore.proto\022\tpalmapmsg\"\215\001\n\007Visitor" +
                     "\022\021\n\tphone_mac\030\001 \001(\014\022\020\n\010scene_id\030\002 \001(\005\022\023\n" +
                     "\013location_id\030\003 \001(\005\022\021\n\tuser_type\030\004 \001(\005\022\023\n" +
@@ -1342,7 +1275,7 @@ public final class ShopStore {
     internal_static_palmapmsg_Visitor_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
             internal_static_palmapmsg_Visitor_descriptor,
-            new java.lang.String[] { "PhoneMac", "SceneId", "LocationId", "UserType", "PhoneBrand", "TimeStamp", "Rssi", });
+            new String[] { "PhoneMac", "SceneId", "LocationId", "UserType", "PhoneBrand", "TimeStamp", "Rssi", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

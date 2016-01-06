@@ -1,7 +1,7 @@
 package com.palmap.rssi.funcs
 
-import com.mongodb.{BasicDBObject, ServerAddress}
 import com.mongodb.casbah.MongoClient
+import com.mongodb.{BasicDBObject, ServerAddress}
 import com.palmap.rssi.common.{Common, GeneralMethods}
 import com.palmap.rssi.message.ShopStore.Visitor
 import org.apache.spark.rdd.RDD
@@ -27,7 +27,7 @@ object HistoryFuncs {
       val mongoClient = MongoClient(serverList.toList)
       try {
         val db = mongoClient(xmlConf(Common.MONGO_DB_NAME))
-        val historyCollection = db(Common.MONGO_HISTORY)
+        val historyCollection = db(Common.MONGO_COLLECTION_HISTORY)
 
         partition.foreach(record => {
           val visitor = Visitor.newBuilder().mergeFrom(record._2)

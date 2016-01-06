@@ -1,22 +1,20 @@
 package com.palmap.rssi.statistic
 
-import com.palmap.rssi.message.ShopStore.{ Visitor}
-import kafka.serializer.StringDecoder
-import org.apache.spark.streaming.StreamingContext
-import org.apache.spark.streaming.Seconds
-import org.apache.spark.SparkConf
-import org.apache.spark.streaming.kafka.KafkaUtils
+import java.io.StringReader
 import java.text.SimpleDateFormat
 import java.util.Date
-import scala.math._
-import com.google.protobuf.ByteString
-import com.palmap.rssi.message.Store.{UserType}
-import com.palmap.rssi.common.{GeneralMethods, Common}
-import com.palmap.rssi.funcs.{RealTimeFuncs, HistoryFuncs, VisitedFuncs}
-import org.apache.spark.storage.StorageLevel
-import java.io.StringReader
 import javax.json.Json
-import scala.collection.JavaConversions._
+
+import com.google.protobuf.ByteString
+import com.palmap.rssi.common.{Common, GeneralMethods}
+import com.palmap.rssi.funcs.{RealTimeFuncs, VisitedFuncs, HistoryFuncs}
+import com.palmap.rssi.message.ShopStore.Visitor
+import kafka.serializer.StringDecoder
+import org.apache.spark.SparkConf
+import org.apache.spark.streaming.{Seconds, StreamingContext}
+import org.apache.spark.streaming.kafka.KafkaUtils
+
+import scala.math._
 
 /**
  * Created by admin on 2015/12/15.
@@ -25,7 +23,7 @@ object ShopSceneLauncher {
   def main(args: Array[String]): Unit = {
     val sparkRssiInfoXml = GeneralMethods.getConf("sparkRssiInfo.xml")
     val apShopMap = ShopSceneFuncs.getApMacShopMap()
-    val macBrandMap = ShopSceneFuncs.getMacBrandMap("mac_brand") //需要传递
+    val macBrandMap = ShopSceneFuncs.getMacBrandMap("mac_brand")
     val (machineMap, employeeMap) = ShopSceneFuncs.getMachineAndEmployeeMac()
 
     val sparkConf = new SparkConf().setAppName("shopMessage")
@@ -69,7 +67,7 @@ object ShopSceneLauncher {
       val phoneMac = arr(2).toLowerCase
       val timeStamp = arr(3).toLong // * 1000
       val rssi = x._2.toInt
-      val locationId = apShopMap(apMac).toInt //获取shopId
+      val locationId = apShopMap(apMac).toInt //???shopId
       val visitorBuilder = Visitor.newBuilder()
       visitorBuilder.setPhoneMac(ByteString.copyFrom(phoneMac.getBytes))
       val phoneMacKey = phoneMac.substring(0, Common.MAC_KEY_LENGTH)
@@ -77,6 +75,8 @@ object ShopSceneLauncher {
       if (macBrandMap.contains(phoneMacKey)) {
         val macBrand = macBrandMap(phoneMacKey)
         visitorBuilder.setPhoneBrand(ByteString.copyFrom(macBrand.getBytes))
+      }else{
+        visitorBuilder.setPhoneBrand(ByteString.copyFrom(phoneBrand.getBytes))
       }
       visitorBuilder.setSceneId(sceneId)
       visitorBuilder.setLocationId(locationId)
@@ -96,23 +96,17 @@ object ShopSceneLauncher {
       val currentDate = new Date()
       val todayDate = todayDateFormat.format(new Date(currentDate.getTime - Common.BATCH_INTERVAL_IN_MILLI_SEC))
       val date = todayDateFormat.parse(todayDate).getTime
-      val currentTime = currentDate.getTime / Common.MINUTE_FORMATER * Common.MINUTE_FORMATER; //转化成秒, 封装
+      val currentTime = currentDate.getTime / Common.MINUTE_FORMATER * Common.MINUTE_FORMATER;
       HistoryFuncs.saveHistory(rdd, date, currentTime)
     })
     visitorRdd.count().map(cnt => "save data to History. " + new Date()).print()
 
-  /*  //Visited
-    visitorRdd.foreachRDD(rdd => {
 
-      VisitedFuncs.saveToMongo(rdd)
-    })
-    visitorRdd.count().map(cnt => "save data to mongo . " + new Date()).print()
-*/
     //Visited
     visitorRdd.foreachRDD(rdd => {
       var currentDate = new Date()
-      val currentSec = currentDate.getTime / 1000 * 1000; //转化成秒, 封装
-      currentDate = new Date(currentSec - 30 * 1000) //需要封装
+      val currentSec = currentDate.getTime / 1000 * 1000
+      currentDate = new Date(currentSec - 30 * 1000)
       currentDate.setHours(0)
       currentDate.setMinutes(0)
       currentDate.setSeconds(0)
@@ -125,7 +119,7 @@ object ShopSceneLauncher {
     val realTimeRdd = visitorRdd.map(record => {
       val todayDateFormat = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
       val currentDate = new Date()
-      val currentTime = currentDate.getTime / Common.MINUTE_FORMATER * Common.MINUTE_FORMATER; //转化成秒, 封装
+      val currentTime = currentDate.getTime / Common.MINUTE_FORMATER * Common.MINUTE_FORMATER
       RealTimeFuncs.calShop(record, currentTime)
     })
     val macsRdd = realTimeRdd.mapPartitions(RealTimeFuncs.mergeMacs).cache
