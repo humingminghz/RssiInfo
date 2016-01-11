@@ -88,7 +88,7 @@ object ShopSceneLauncher {
       curVisitor.mergeFrom(bytesNextVisitor, 0, bytesNextVisitor.length)
       curVisitor.build().toByteArray()
     }).mapPartitions(ShopUnitFuncs.setUserType(_,machineMap,employeeMap)).cache()
-    visitorRdd.print()
+
 
     //history
     visitorRdd.foreachRDD(rdd => {
@@ -106,7 +106,7 @@ object ShopSceneLauncher {
     visitorRdd.foreachRDD(rdd => {
       var currentDate = new Date()
       val currentSec = currentDate.getTime / 1000 * 1000
-      currentDate = new Date(currentSec - 30 * 1000)
+      currentDate = new Date(currentSec - 60 * 1000)
       currentDate.setHours(0)
       currentDate.setMinutes(0)
       currentDate.setSeconds(0)
@@ -115,16 +115,25 @@ object ShopSceneLauncher {
     })
     visitorRdd.count().map(cnt => "save data to Visited. " + new Date()).print()
 
-    //RealTime
+     //RealTime
     val realTimeRdd = visitorRdd.map(record => {
-      val todayDateFormat = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
-      val currentDate = new Date()
-      val currentTime = currentDate.getTime / Common.MINUTE_FORMATER * Common.MINUTE_FORMATER
-      RealTimeFuncs.calShop(record, currentTime)
+       var currentDate = new Date()
+
+    //  val currentTime = minuteFormat.parse(minuteFormat.format(currentDate)).getTime
+      RealTimeFuncs.calShop(record, currentDate.getTime)
     })
-    val macsRdd = realTimeRdd.mapPartitions(RealTimeFuncs.mergeMacs).cache
-    macsRdd.foreachRDD(RealTimeFuncs.saveMacs _)
-    macsRdd.count().map(cnt => "save" + cnt + " macs data to mongo. " + new Date()).print()
+   /* val macsRdd = realTimeRdd.mapPartitions(RealTimeFuncs.mergeMacs).cache
+    macsRdd.foreachRDD(RealTimeFuncs.saveMacs _)*/
+  // val macsRdd2 =realTimeRdd.groupByKey().foreach(RealTimeFuncs.groupList(_))
+    //val calRealtimeRdd= macsRdd2.map(x => x._2).map(RealTimeFuncs.saveRealtime _)
+    //calRealtimeRdd.count().map(cnt => "save" + cnt + " macs data to mongo. " + new Date()).print()
+     val groupdd=realTimeRdd.groupByKey().map(RealTimeFuncs.groupList(_)).cache()
+    groupdd.map(x => x._2).foreachRDD(rdd => {RealTimeFuncs.saveRealtimeRdd(rdd)})
+    //  val calRealtimeRdd=  groupdd.map(x => x._2).filter(record=>{!record._5.isEmpty}).map(RealTimeFuncs.saveRealtime _)
+    //groupdd.map(x => x._2).filter(record=>{!record._5.isEmpty}).foreachRDD(rdd => {RealTimeFuncs.saveRealtimeRdd(rdd)})
+    // calRealtimeRdd.count().map(cnt => "save" + cnt + " macs data to mongo. " + new Date()).print()
+    // val macsRdd = realTimeRdd.mapPartitions(RealTimeFuncs.mergeMacs).cache
+    // macsRdd.foreachRDD(RealTimeFuncs.saveMacs _)*/
 
     ssc.start()
     ssc.awaitTermination()
