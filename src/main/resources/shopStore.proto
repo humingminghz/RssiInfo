@@ -1,0 +1,10 @@
+package palmapmsg;
+option java_package = "com.palmap.rssi.message";
+
+message Visitor {
+  optional bytes   phone_mac    = 1;
+  optional int32   scene_id     = 2;
+  optional bytes   phone_brand  = 3;
+  optional uint64  time_stamp   = 4;
+  repeated sint32  rssi         = 5;
+}

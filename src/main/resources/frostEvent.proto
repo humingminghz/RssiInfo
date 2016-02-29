@@ -1,0 +1,28 @@
+package com.palmap.rssi.message;
+
+enum IdType {
+  MAC = 0;
+  UUID = 1;
+  UNKNOWN_TYPE = 2;
+}
+
+enum StubType {
+  AP = 0;
+  BLUETOOTH = 1;
+  UNKNOWN_STUB_TYPE = 2;
+}
+
+message RssiItem {
+  required string id_data = 1;
+  required IdType id_type = 2;
+  required int32  rssi = 3;
+}
+
+message RssiInfo {
+  required string id_data = 1;
+  required IdType id_type = 2;
+  required StubType stub_type = 3;
+  required int64 timestamp = 4;
+  repeated RssiItem items = 5;
+  required int64 scene_id = 6;
+}

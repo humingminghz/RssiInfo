@@ -2,12 +2,9 @@ package com.palmap.rssi.statistic
 
 import java.text.SimpleDateFormat
 
-import com.mongodb.ServerAddress
-import com.mongodb.casbah.MongoClient
-import com.palmap.rssi.common.{GeneralMethods, Common}
+import com.palmap.rssi.common.{MongoFactory, GeneralMethods, Common}
 
 import scala.collection.JavaConversions._
-import scala.collection.mutable.ListBuffer
 import scala.io.Source
 
 object ShopSceneFuncs {
@@ -15,27 +12,19 @@ object ShopSceneFuncs {
   val xmlConf = GeneralMethods.getConf(Common.SPARK_CONFIG)
 
   def getApMacShopMap(): Map[String, Int] = {
-    val mongoServerList = xmlConf(Common.MONGO_ADDRESS_LIST)
-    val mongoServerArr = mongoServerList.split(",", -1)
-    var serverList = ListBuffer[ServerAddress]()
-    for (i <- 0 until mongoServerArr.length) {
-      val server = new ServerAddress(mongoServerArr(i), xmlConf(Common.MONGO_SERVER_PORT).toInt)
-      serverList.append(server)
-    }
-    val mongoClient = MongoClient(serverList.toList)
+
     val ApMacShopIdMap = scala.collection.mutable.Map[String, Int]()
     try {
-
-      val db = mongoClient(xmlConf(Common.MONGO_DB_NAME))
-      val collection = db(Common.MONGO_STORE_APMAC_RELATION)
-      val mongoCusor = collection.find()
-      if (mongoCusor != null) {
+      val apMacCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_STORE_APMAC)
+      val mongoCusor = apMacCollection.find()
+      if (!mongoCusor.isEmpty) {
         for (mongoDoc <- mongoCusor) {
-          ApMacShopIdMap(mongoDoc.get("apmac").toString().toLowerCase()) = mongoDoc.get("store_id").toString().toInt
+          ApMacShopIdMap += (mongoDoc.get(Common.MONGO_STORE_APMAC_APMAC).toString().toLowerCase() -> mongoDoc.get(Common.MONGO_STORE_APMAC_SCENEID).toString().toDouble.toInt)
         }
       }
-    } finally {
-      mongoClient.close()
+
+    } catch {
+      case e: Exception => e.printStackTrace()
     }
 
     ApMacShopIdMap.toMap
@@ -44,9 +33,9 @@ object ShopSceneFuncs {
   def getMacBrandMap(fileName: String): Map[String, String] = {
     var macBrandMap = scala.collection.mutable.Map[String, String]()
     Source.fromFile(fileName).getLines()
-      .filter(_.split("\u0001").length == 2)
+      .filter(_.split(Common.CTRL_A).length == 2)
       .foreach { line =>
-        val arr = line.split("\u0001")
+        val arr = line.split(Common.CTRL_A)
         macBrandMap(arr(0)) = arr(1)
       }
     macBrandMap.toMap
@@ -70,25 +59,14 @@ object ShopSceneFuncs {
 
     val machineMap = scala.collection.mutable.Map[Int, scala.collection.mutable.Set[String]]()
     val employeeMap = scala.collection.mutable.Map[Int, scala.collection.mutable.Set[String]]()
-    val mongoServerList = xmlConf(Common.MONGO_ADDRESS_LIST)
-    val mongoServerArr = mongoServerList.split(",", -1)
-    var serverList = ListBuffer[ServerAddress]()
-    for (i <- 0 until mongoServerArr.length) {
-      val server = new ServerAddress(mongoServerArr(i), xmlConf(Common.MONGO_SERVER_PORT).toInt)
-      serverList.append(server)
-    }
-    val mongoClient = MongoClient(serverList.toList)
     val ApMacShopIdMap = scala.collection.mutable.Map[String, Int]()
     try {
-
-      val db = mongoClient(xmlConf(Common.MONGO_DB_NAME))
-      val collection = db(Common.MONGO_USER_TYPE_INFO)
-
-      val typeCusor = collection.find()
+      val userTypeCollection = MongoFactory.getDBCollection(Common.MONGO_USER_TYPE_INFO)
+      val typeCusor = userTypeCollection.find()
       for (mongoDoc <- typeCusor) {
-        val shopId = mongoDoc.get("planar_graph").toString().toInt //mongo.collection.userinfo.shopid
-        val userType = mongoDoc.get("user_type").toString().toDouble.toInt.toString //mongo.collection.userinfo.type
-        val userMac = mongoDoc.get("user_mac").toString().toLowerCase() //mongo.collection.userinfo.mac
+        val shopId = mongoDoc.get("shopId").toString().toInt //mongo.collection.userinfo.shopid
+        val userType = mongoDoc.get("userType").toString() //mongo.collection.userinfo.type
+        val userMac = mongoDoc.get("userMac").toString().toLowerCase() //mongo.collection.userinfo.mac
 
         userType match {
           case "0" => {
@@ -111,10 +89,12 @@ object ShopSceneFuncs {
           }
         }
       }
-      (machineMap.toMap, employeeMap.toMap)
-    } finally {
-      mongoClient.close()
+
+    } catch {
+      case e: Exception => e.printStackTrace()
     }
+
+    (machineMap.toMap, employeeMap.toMap)
   }
 
 

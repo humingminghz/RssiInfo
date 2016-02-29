@@ -1,13 +1,13 @@
 package com.palmap.rssi.funcs
 
-import com.mongodb.casbah.MongoClient
-import com.mongodb.{BasicDBObject, ServerAddress}
-import com.palmap.rssi.common.{Common, GeneralMethods}
+import java.text.SimpleDateFormat
+import java.util.Date
+
+import com.mongodb.BasicDBObject
+import com.palmap.rssi.common.{Common, GeneralMethods, MongoFactory}
 import com.palmap.rssi.message.ShopStore.Visitor
 import org.apache.spark.rdd.RDD
 import org.json.JSONArray
-
-import scala.collection.mutable.ListBuffer
 
 /**
  * Created by admin on 2015/12/28.
@@ -15,36 +15,29 @@ import scala.collection.mutable.ListBuffer
 object HistoryFuncs {
   val xmlConf = GeneralMethods.getConf(Common.SPARK_CONFIG)
 
-  def saveHistory(rdd: RDD[(String, Array[Byte])], date: Long, currentTime: Long): Unit = {
+  def saveHistory(rdd: RDD[(String, Array[Byte])]): Unit = {
     rdd.foreachPartition { partition => {
-      val mongoServerList = xmlConf(Common.MONGO_ADDRESS_LIST)
-      val mongoServerArr = mongoServerList.split(",", -1)
-      var serverList = ListBuffer[ServerAddress]()
-      for (i <- 0 until mongoServerArr.length) {
-        val server = new ServerAddress(mongoServerArr(i), xmlConf(Common.MONGO_SERVER_PORT).toInt)
-        serverList.append(server)
-      }
-      val mongoClient = MongoClient(serverList.toList)
       try {
-        val db = mongoClient(xmlConf(Common.MONGO_DB_NAME))
-        val historyCollection = db(Common.MONGO_COLLECTION_HISTORY)
+        val historyCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_HISTORY)
 
         partition.foreach(record => {
           val visitor = Visitor.newBuilder().mergeFrom(record._2)
           val userMac = visitor.getPhoneMac
           val sceneId = visitor.getSceneId
-          val locationId = visitor.getLocationId
-          val findQuery = new BasicDBObject
-          findQuery.put(Common.MONGO_HISTORY_DAYS, new BasicDBObject(Common.MONGO_OPTION_SLICE, List[Int](-1, 1)))
+          val currentTime = visitor.getTimeStamp
+          val todayDateFormat = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
+          val todayDate = todayDateFormat.format(new Date(currentTime))
+          val date = todayDateFormat.parse(todayDate).getTime
 
           val update = new BasicDBObject
           update.put(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_HISTORY_TIMES, 1))
           update.put(Common.MONGO_OPTION_PUSH, new BasicDBObject(Common.MONGO_HISTORY_DAYS, date))
 
           val query = new BasicDBObject
-          query.put(Common.MONGO_HISTORY_LOCATIONID, locationId)
           query.put(Common.MONGO_HISTORY_SCENEID, visitor.getSceneId)
           query.put(Common.MONGO_HISTORY_MAC, new String(visitor.getPhoneMac.toByteArray()))
+
+          val findQuery = new BasicDBObject(Common.MONGO_HISTORY_DAYS, new BasicDBObject(Common.MONGO_OPTION_SLICE, List[Int](-1, 1)))
 
           var isDateExist = false
           val retList = historyCollection.find(query, findQuery).toList
@@ -52,12 +45,14 @@ object HistoryFuncs {
             val latestDate = new JSONArray(retList.head.get(Common.MONGO_HISTORY_DAYS).toString()).getLong(0)
             isDateExist = latestDate >= date
           }
-          if (!isDateExist)
+
+          if (!isDateExist) {
             historyCollection.update(query, update,  true)
+          }
 
         })
-      } finally {
-        mongoClient.close()
+      } catch {
+        case e: Exception => e.printStackTrace()
       }
     }
     }
