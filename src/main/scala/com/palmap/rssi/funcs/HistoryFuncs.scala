@@ -18,7 +18,7 @@ object HistoryFuncs {
   def saveHistory(rdd: RDD[(String, Array[Byte])]): Unit = {
     rdd.foreachPartition { partition => {
       try {
-        val historyCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_HISTORY)
+        val historyCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_HISTORY)
 
         partition.foreach(record => {
           val visitor = Visitor.newBuilder().mergeFrom(record._2)
@@ -30,19 +30,19 @@ object HistoryFuncs {
           val date = todayDateFormat.parse(todayDate).getTime
 
           val update = new BasicDBObject
-          update.put(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_HISTORY_TIMES, 1))
-          update.put(Common.MONGO_OPTION_PUSH, new BasicDBObject(Common.MONGO_HISTORY_DAYS, date))
+          update.put(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_HISTORY_SHOP_TIMES, 1))
+          update.put(Common.MONGO_OPTION_PUSH, new BasicDBObject(Common.MONGO_HISTORY_SHOP_DAYS, date))
 
           val query = new BasicDBObject
-          query.put(Common.MONGO_HISTORY_SCENEID, visitor.getSceneId)
-          query.put(Common.MONGO_HISTORY_MAC, new String(visitor.getPhoneMac.toByteArray()))
+          query.put(Common.MONGO_HISTORY_SHOP_SCENEID, visitor.getSceneId)
+          query.put(Common.MONGO_HISTORY_SHOP_MAC, new String(visitor.getPhoneMac.toByteArray()))
 
-          val findQuery = new BasicDBObject(Common.MONGO_HISTORY_DAYS, new BasicDBObject(Common.MONGO_OPTION_SLICE, List[Int](-1, 1)))
+          val findQuery = new BasicDBObject(Common.MONGO_HISTORY_SHOP_DAYS, new BasicDBObject(Common.MONGO_OPTION_SLICE, List[Int](-1, 1)))
 
           var isDateExist = false
           val retList = historyCollection.find(query, findQuery).toList
           if (retList.size > 0) {
-            val latestDate = new JSONArray(retList.head.get(Common.MONGO_HISTORY_DAYS).toString()).getLong(0)
+            val latestDate = new JSONArray(retList.head.get(Common.MONGO_HISTORY_SHOP_DAYS).toString()).getLong(0)
             isDateExist = latestDate >= date
           }
 

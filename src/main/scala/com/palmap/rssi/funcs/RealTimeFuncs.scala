@@ -17,246 +17,67 @@ import scala.collection.mutable.ListBuffer
 object RealTimeFuncs {
   val xmlConf = GeneralMethods.getConf(Common.SPARK_CONFIG)
 
-  def calRealTime(partition: Iterator[(String, Array[Byte])]): Iterator[(Int, scala.collection.mutable.Set[String])] = {
-    val ret = scala.collection.mutable.ListBuffer[(Int, scala.collection.mutable.Set[String])]()
+  def calRealTime(partition: Iterator[(String, Array[Byte])]): Iterator[(String, scala.collection.mutable.Set[String])] = {
+    val ret = scala.collection.mutable.ListBuffer[(String, scala.collection.mutable.Set[String])]()
     partition.foreach(record => {
       val visitor = Visitor.newBuilder().mergeFrom(record._2, 0, record._2.length)
       val macs = scala.collection.mutable.Set[String]()
+      val isCustomer = visitor.getIsCustomer
+      val time=visitor.getTimeStamp
       macs.add(new String(visitor.getPhoneMac.toByteArray))
-      val key = record._1.split(Common.CTRL_A, -1)
-      ret.append((visitor.getSceneId, macs))
+
+      ret.append((visitor.getSceneId + Common.CTRL_A + isCustomer+Common.CTRL_A +time, macs))
     })
 
     ret.toIterator
   }
 
 
+  def calMacsList(partition: (String, Iterable[scala.collection.mutable.Set[String]])): (String, scala.collection.mutable.Set[String]) = {
+    val ret = scala.collection.mutable.ListBuffer[(String, scala.collection.mutable.Set[String])]()
+    var macsList = scala.collection.mutable.Set[String]()
 
-
-
-//  def groupList(partition: Iterator[(String, Set[String])]): Iterator[(String, Set[String])] = {
-//    partition.foreach(record => {
-//      record._1
-//    })
-//    val arr = partition._1.split(Common.CTRL_A, -1)
-//    val sceneId = arr(0).toInt
-//    val locationId = arr(1).toInt
-//    val userType = arr(2).toInt
-//    var currentTime = new Date().getTime
-//    val macSet = scala.collection.mutable.Set[String]()
-//    val iter = partition._2.iterator
-//    while (iter.hasNext) {
-//      val record = iter.next()
-//      val mac = record._2
-//      macSet.add(mac)
-//      if(currentTime > record._1) currentTime = record._1
-//    }
-//
-//    (partition._1, (sceneId, macSet))
-//  }
-
-//  def groupList(partition: (String, Iterable[(Long, String)])): (String, (Int,scala.collection.mutable.Set[String])) = {
-//
-//    val arr = partition._1.split(Common.CTRL_A, -1)
-//    val sceneId = arr(0).toInt
-//    val locationId = arr(1).toInt
-//    val userType = arr(2).toInt
-//    var currentTime = new Date().getTime
-//    val macSet = scala.collection.mutable.Set[String]()
-//    val iter = partition._2.iterator
-//    while (iter.hasNext) {
-//      val record = iter.next()
-//      val mac = record._2
-//      macSet.add(mac)
-//      if(currentTime > record._1) currentTime = record._1
-//    }
-//
-//    (partition._1, (sceneId, macSet))
-//  }
-
-
-//  def calShop(record: (String, Array[Byte])): (String, (Long, String)) = {
-//    val visitor = Visitor.newBuilder().mergeFrom(record._2)
-//    val userMac = new String(visitor.getPhoneMac.toByteArray())
-//    val sceneId = visitor.getSceneId
-//    val currentTime = new Date().getTime
-//
-//    (sceneId + Common.CTRL_A + userType, (currentTime, userMac))
-//  }
-
-  def mergeMacs(partition: Iterator[(String, (Long, Int, Int, String, Int))]): Iterator[(String, (Long, Int, Int, Int, List[String]))] = {
-    val ret = scala.collection.mutable.Map[String, (Long, Int, Int, Int, List[String])]()
-    partition.foreach(record => {
-      val userType = record._2._5
-      if (ret.contains(record._1)) {
-        val tmp = ret(record._1)
-        ret += record._1 ->(tmp._1, tmp._2, tmp._3, record._2._5, (record._2._4) :: tmp._5)
-      } else {
-        val list = List[String]()
-        ret += record._1 ->(record._2._1, record._2._2, record._2._3, record._2._5, (record._2._4) :: list)
-      }
-
-    })
-    ret.toIterator
+    val iter = partition._2.iterator
+    while (iter.hasNext) {
+      val macs = iter.next()
+      macsList ++ macs
+    }
+    (partition._1, macsList)
   }
 
+  def saveMacs(record: (String, scala.collection.mutable.Set[String])): Unit = {
+    try {
+      val realTimeCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_REALTIME)
+      val realTimeHourCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_REALTIMEHOUR)
+      val arrs = record._1.split(Common.CTRL_A, -1)
+      val sceneId = arrs(0).toInt
+      val isCustomer = arrs(1).toBoolean
+      val macList = record._2
+      val minTime=arrs(2).toLong
+    /*  var currentDate = new Date(time)
+      val currentSec = currentDate.getTime / 1000 * 1000
+      currentDate = new Date(currentSec - Common.BATCH_INTERVAL_IN_MILLI_SEC)
+      val minuteFormat = new SimpleDateFormat(Common.NOW_MINUTE_FORMAT)*/
+      val hourFormat = new SimpleDateFormat(Common.NOW_HOUR_FORMAT)
+      val hour = hourFormat.parse(hourFormat.format(minTime)).getTime
+      //val minTime = minuteFormat.parse(minuteFormat.format(currentDate)).getTime
 
-//    def saveMacs(rdd: RDD[(String, (Long, Int, Int, Int, List[String]))]): Unit = {
-//
-//      //(currentTime,sceneId,locationId,userType,macList)
-//      rdd.foreachPartition { partition => {
-//        val mongoServerList = xmlConf(Common.MONGO_ADDRESS_LIST)
-//        val mongoServerArr = mongoServerList.split(",", -1)
-//        var serverList = ListBuffer[ServerAddress]()
-//        for (i <- 0 until mongoServerArr.length) {
-//          val server = new ServerAddress(mongoServerArr(i), xmlConf(Common.MONGO_SERVER_PORT).toInt)
-//          serverList.append(server)
-//        }
-//        val mongoClient = MongoClient(serverList.toList)
-//        val db = mongoClient(xmlConf(Common.MONGO_DB_NAME))
-//        val realTimeCollection = db(Common.MONGO_COLLECTION_REALTIME)
-//        val realTimeHourCollection = db(Common.MONGO_COLLECTION_REALTIME_HOUR)
-//        try {
-//          partition.filter(record => !record._2._5.isEmpty).foreach(record => {
-//            val minuteFormat = new SimpleDateFormat(Common.NOW_MINUTE_FORMAT)
-//            val hourFormat = new SimpleDateFormat(Common.NOW_HOUR_FORMAT)
-//            val currentDate = new Date(record._2._1)
-//            val hour = hourFormat.parse(hourFormat.format(currentDate)).getTime
-//            val minTime = minuteFormat.parse(minuteFormat.format(currentDate)).getTime
-//            //val macList = record._2._5
-//           // val list = List[String]()
-//            val macList = record._2._5
-//            /*.map(record => {
-//              record :: list
-//            })*/
-//            val minQuery = new BasicDBObject(Common.MONGO_REALTIME_TIME,minTime)
-//            minQuery.put(Common.MONGO_REALTIME_SCENEID, record._2._2)
-//            minQuery.put(Common.MONGO_REALTIME_LOCATIONID, record._2._3)
-//            minQuery.put(Common.MONGO_REALTIME_USERTYPE, record._2._4)
-//            val minUpdate = new BasicDBObject
-//            minUpdate.put(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_REALTIME_MACSUM, macList.size))
-//            minUpdate.put(Common.MONGO_OPTION_PUSH, new BasicDBObject(Common.MONGO_REALTIME_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
-//            realTimeCollection.update(minQuery, minUpdate, true)
-//            //db.shop_realtime.ensureIndex({"time":1,"sceneId":1,"locationId":1,"userType":1})
-//            //db.shop_realtime.ensureIndex({"time":1,"sceneId":1,"locationId":1,"userType":1})
-//
-//            val hourQuery = new BasicDBObject(Common.MONGO_REALTIME_HOUR, hour)
-//            hourQuery.put(Common.MONGO_REALTIME_HOUR_SCENEID, record._2._2)
-//            hourQuery.put(Common.MONGO_REALTIME_HOUR_LOCATIONID, record._2._3)
-//            hourQuery.put(Common.MONGO_REALTIME_HOUR_USERTYPE, record._2._4)
-//            val hourUpdate = new BasicDBObject
-//            hourUpdate.put(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_REALTIMEHOUR_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
-//            realTimeHourCollection.update(hourQuery, hourUpdate, true)
-//
-//          })
-//        } finally {
-//          mongoClient.close()
-//        }
-//      }
-//      }
-//    }
+      val query = new BasicDBObject(Common.MONGO_SHOP_REALTIME_TIME, minTime)
+      query.put(Common.MONGO_SHOP_REALTIME_SCENEID, sceneId)
+      query.put(Common.MONGO_SHOP_REALTIME_ISCUSTOMER, isCustomer)
+      val update = new BasicDBObject()
+      update.put(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_SHOP_REALTIME_MACSUM, macList.size))
+      update.put(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_SHOP_REALTIME_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
+      realTimeCollection.update(query, update, true)
 
-
-
-//  def groupList(partition: (String, Iterable[(Long, String)])): (String, (Long, Int, Int, Int,scala.collection.mutable.Set[String])) = {
-//
-//    val arr = partition._1.split(Common.CTRL_A, -1)
-//    val sceneId = arr(0).toInt
-//    val locationId = arr(1).toInt
-//    val userType = arr(2).toInt
-//    var currentTime = new Date().getTime
-//    val macSet = scala.collection.mutable.Set[String]()
-//    val iter = partition._2.iterator
-//    while (iter.hasNext) {
-//      val record = iter.next()
-//      val mac = record._2
-//      macSet.add(mac)
-//      if(currentTime > record._1) currentTime = record._1
-//    }
-//
-//    (partition._1, (currentTime, sceneId, locationId, userType, macSet))
-//  }
-
-
-  def saveRealtimeRdd(rdd: RDD[(Int, scala.collection.mutable.Set[String])]): Unit = {
-
-    rdd.foreachPartition { partition => {
-      try {
-        val realTimeCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_REALTIME)
-        val realTimeHourCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_REALTIME_HOUR)
-        partition.foreach(record => {
-          var currentDate = new Date()
-          val currentSec = currentDate.getTime / 1000 * 1000
-          currentDate = new Date(currentSec - Common.BATCH_INTERVAL_IN_MILLI_SEC)
-          val minuteFormat = new SimpleDateFormat(Common.NOW_MINUTE_FORMAT)
-          val hourFormat = new SimpleDateFormat(Common.NOW_HOUR_FORMAT)
-          val hour = hourFormat.parse(hourFormat.format(currentDate)).getTime
-          val minTime = minuteFormat.parse(minuteFormat.format(currentDate)).getTime
-          val macList = record._2
-
-          val query = new BasicDBObject(Common.MONGO_REALTIME_TIME, minTime)
-          query.put(Common.MONGO_REALTIME_SCENEID, record._1)
-          val update = new BasicDBObject()
-          update.put(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_REALTIME_MACSUM, macList.size))
-          update.put(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_REALTIME_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
-          realTimeCollection.update(query, update, true)
-
-          val hourQuery = new BasicDBObject(Common.MONGO_REALTIME_HOUR, hour)
-          hourQuery.put(Common.MONGO_REALTIME_HOUR_SCENEID, record._1)
-          val hourUpdate = new BasicDBObject
-          hourUpdate.put(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_REALTIMEHOUR_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
-          realTimeHourCollection.update(hourQuery, hourUpdate, true)
-
-        })
-      } catch {
-        case e: Exception => e.printStackTrace()
-      }
-    }
-
+      val hourQuery = new BasicDBObject(Common.MONGO_SHOP_REALTIME_HOUR, hour)
+      hourQuery.put(Common.MONGO_SHOP_REALTIMEHOUR_SCENEID, sceneId)
+      hourQuery.put(Common.MONGO_SHOP_REALTIME_ISCUSTOMER, isCustomer)
+      val hourUpdate = new BasicDBObject
+      hourUpdate.put(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_SHOP_REALTIMEHOUR_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
+      realTimeHourCollection.update(hourQuery, hourUpdate, true)
+    } catch {
+      case e: Exception => e.printStackTrace()
     }
   }
-
-
-//  def saveRealtimeRdd(rdd: RDD[(Int, scala.collection.mutable.Set[String])]): Unit = {
-//
-//    rdd.foreachPartition { partition => {
-//      try {
-//        val realTimeCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_REALTIME)
-//        val realTimeHourCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_REALTIME_HOUR)
-//        partition.foreach(record => {
-//          var currentDate = new Date()
-//          val currentSec = currentDate.getTime / 1000 * 1000
-//          currentDate = new Date(currentSec - 60 * 1000)
-//          val minuteFormat = new SimpleDateFormat(Common.NOW_MINUTE_FORMAT)
-//          val hourFormat = new SimpleDateFormat(Common.NOW_HOUR_FORMAT)
-//          val hour = hourFormat.parse(hourFormat.format(currentDate)).getTime
-//          val minTime = minuteFormat.parse(minuteFormat.format(currentDate)).getTime
-//
-//          val macList = record._2
-//
-//          val query = new BasicDBObject(Common.MONGO_REALTIME_TIME,minTime )
-//          query.put(Common.MONGO_REALTIME_SCENEID, record._1)
-//          val update = new BasicDBObject()
-//          update.put(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_REALTIME_MACSUM, macList.size))
-//          update.put(Common.MONGO_OPTION_PUSH, new BasicDBObject(Common.MONGO_REALTIME_MACS,macList))
-//          realTimeCollection.update(query, update, true)
-//
-//          val hourQuery = new BasicDBObject(Common.MONGO_REALTIME_HOUR, hour)
-//          hourQuery.put(Common.MONGO_REALTIME_HOUR_SCENEID, record._1)
-//          val hourUpdate = new BasicDBObject
-//          hourUpdate.put(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_REALTIMEHOUR_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
-//          realTimeHourCollection.update(hourQuery, hourUpdate, true)
-//
-//        })
-//      } catch {
-//        case e: Exception => e.printStackTrace()
-//      }
-//    }
-//
-//    }
-//  }
-
-
-
-
 }

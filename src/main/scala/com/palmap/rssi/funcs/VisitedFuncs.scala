@@ -18,7 +18,7 @@ object VisitedFuncs {
     {
       try {
         val visitedCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_VISITED)
-        val historyCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_HISTORY)
+        val historyCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_HISTORY)
         partition.foreach(record => {
           val visitor = Visitor.newBuilder().mergeFrom(record._2)
           val userMac = new String(visitor.getPhoneMac.toByteArray())
