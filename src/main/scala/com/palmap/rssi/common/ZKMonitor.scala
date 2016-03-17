@@ -10,7 +10,7 @@ import org.apache.curator.utils.EnsurePath
  */
 object ZKMonitor {
   val xmlConf = GeneralMethods.getConf(Common.SPARK_CONFIG)
-  val ZK_CONF_MONITOR_PATH="/palmap/frost/conf"
+  val ZK_CONF_MONITOR_PATH="/nova/conf"
   def startMonitor()={
     val retryPolicy=new ExponentialBackoffRetry(1000,3)
 
@@ -33,6 +33,8 @@ object ZKMonitor {
         val znodeData = new String(cache.getCurrentData.getData)
         println("confNodeCache changed, data is: " + znodeData)
         try {
+          ConfInfoSet.getSceneIdlist()
+
           val info = znodeData.split(Common.CTRL_A, -1)
           info(0) match {
             case Common.STORE_BUSINESS_HOURS => {

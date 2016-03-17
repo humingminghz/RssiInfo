@@ -33,17 +33,6 @@ object RealTimeFuncs {
   }
 
 
-  def calMacsList(partition: (String, Iterable[scala.collection.mutable.Set[String]])): (String, scala.collection.mutable.Set[String]) = {
-    val ret = scala.collection.mutable.ListBuffer[(String, scala.collection.mutable.Set[String])]()
-    var macsList = scala.collection.mutable.Set[String]()
-
-    val iter = partition._2.iterator
-    while (iter.hasNext) {
-      val macs = iter.next()
-      macsList ++ macs
-    }
-    (partition._1, macsList)
-  }
 
   def saveMacs(record: (String, scala.collection.mutable.Set[String])): Unit = {
     try {

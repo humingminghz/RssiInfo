@@ -5,6 +5,7 @@ package com.palmap.rssi.common;
 
 public class Common {
 	public static final String BRAND_UNKNOWN    = "unknown";
+	public static final String SHOP_SCENEIDS_URL="sceneIdsUrl";
 
 	public static final int CUSTOMER_JUDGE = 5;
 	public static final int MAC_KEY_LENGTH = 8;
