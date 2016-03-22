@@ -18,3 +18,4 @@ object GeneralMethods {
     confMap
   }
 }
+

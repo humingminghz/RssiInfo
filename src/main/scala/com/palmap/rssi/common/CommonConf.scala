@@ -7,9 +7,9 @@ import scala.collection.mutable
  */
 object CommonConf {
 
-  val sceneIdlist= mutable.HashSet[Int]()
+ // val sceneIdlist=  scala.collection.mutable.HashSet[Int]()
   val businessHoursMap = scala.collection.mutable.Map[Int ,(Int, Int)]()
   ConfInfoSet.getBusinessHoursMap //get static info
-  ConfInfoSet.getSceneIdlist
+  //ConfInfoSet.getSceneIdlist
   ZKMonitor .startMonitor()
 }

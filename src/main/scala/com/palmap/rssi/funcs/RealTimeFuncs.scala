@@ -58,10 +58,11 @@ object RealTimeFuncs {
       update.put(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_SHOP_REALTIME_MACSUM, macList.size))
       update.put(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_SHOP_REALTIME_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
       realTimeCollection.update(query, update, true)
-
+      //db.shop_realtime.ensureIndex({"time":1,"sceneId":1,"isCustomer":1})
+      //db.shop_realtime_hour.ensureIndex({"hour":1,"sceneId":1,"isCustomer":1})
       val hourQuery = new BasicDBObject(Common.MONGO_SHOP_REALTIME_HOUR, hour)
       hourQuery.put(Common.MONGO_SHOP_REALTIMEHOUR_SCENEID, sceneId)
-      hourQuery.put(Common.MONGO_SHOP_REALTIME_ISCUSTOMER, isCustomer)
+      hourQuery.put(Common.MONGO_SHOP_REALTIME_HOUR_ISCUSTOMER, isCustomer)
       val hourUpdate = new BasicDBObject
       hourUpdate.put(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_SHOP_REALTIMEHOUR_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
       realTimeHourCollection.update(hourQuery, hourUpdate, true)

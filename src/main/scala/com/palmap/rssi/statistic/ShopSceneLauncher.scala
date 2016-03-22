@@ -29,13 +29,11 @@ object ShopSceneLauncher {
 
     val sparkConf = new SparkConf().setAppName("frost-launcher")
     sparkConf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-    sparkConf.set("spark.kryoserializer.buffer.mb","5")
-    sparkConf.registerKryoClasses(Array(classOf[Visitor], classOf[Visitor.Builder]))
-
-    //sparkConf.set("spark.default.parallelism", "60")
-
+   // sparkConf.set("spark.kryoserializer.buffer.mb","5")
     //开启shuffle block file的合并
     sparkConf.set("spark.shuffle.consolidateFiles", "true")
+    //sparkConf.set("spark.default.parallelism", "60")
+    sparkConf.registerKryoClasses(Array(classOf[Visitor], classOf[Visitor.Builder]))
 
     val ssc = new StreamingContext(sparkConf, Seconds(60))
     ssc.checkpoint("frost-checkpoint")
@@ -45,7 +43,8 @@ object ShopSceneLauncher {
 
     val visitorRdd = messagesRdd.map(x => x._2)
 
-    .flatMap(ShopUnitFuncs.visitorInfo _) .filter(ShopUnitFuncs.filterFuncs(_))
+    .flatMap(ShopUnitFuncs.visitorInfo _)
+  .filter(ShopUnitFuncs.filterFuncs(_))
     .reduceByKey(max)
     .mapPartitions(ShopUnitFuncs.buildVisitor _)
     .reduceByKey((bytesCurVisitor, bytesNextVisitor) => {

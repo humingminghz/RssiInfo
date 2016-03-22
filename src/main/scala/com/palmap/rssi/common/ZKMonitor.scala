@@ -33,7 +33,7 @@ object ZKMonitor {
         val znodeData = new String(cache.getCurrentData.getData)
         println("confNodeCache changed, data is: " + znodeData)
         try {
-          ConfInfoSet.getSceneIdlist()
+         // ConfInfoSet.getSceneIdlist()
 
           val info = znodeData.split(Common.CTRL_A, -1)
           info(0) match {

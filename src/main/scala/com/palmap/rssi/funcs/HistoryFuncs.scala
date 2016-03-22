@@ -36,7 +36,7 @@ object HistoryFuncs {
           val query = new BasicDBObject
           query.put(Common.MONGO_HISTORY_SHOP_SCENEID, visitor.getSceneId)
           query.put(Common.MONGO_HISTORY_SHOP_MAC, new String(visitor.getPhoneMac.toByteArray()))
-
+          //db.shop_history.ensureIndex({"sceneId":1,"mac":1})
           val findQuery = new BasicDBObject(Common.MONGO_HISTORY_SHOP_DAYS, new BasicDBObject(Common.MONGO_OPTION_SLICE, List[Int](-1, 1)))
 
           var isDateExist = false

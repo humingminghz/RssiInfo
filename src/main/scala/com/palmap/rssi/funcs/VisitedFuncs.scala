@@ -48,6 +48,7 @@ object VisitedFuncs {
           query.put(Common.MONGO_SHOP_VISITED_SCENEID, sceneId)
           query.put(Common.MONGO_SHOP_VISITED_MAC, userMac)
 
+          //db.shop_visited.ensureIndex({"date":1,"sceneId":1,"mac":1})
           val queryCol = new BasicDBObject(Common.MONGO_SHOP_VISITED_DWELL, 1).append(Common.MONGO_OPTION_ID, 0)
 
           var isCustomer = false;

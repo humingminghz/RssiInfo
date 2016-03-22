@@ -15,41 +15,45 @@ object ShopUnitFuncs {
   val xmlConf = GeneralMethods.getConf(Common.SPARK_CONFIG)
 
   val macBrandMap = ShopSceneFuncs.getMacBrandMap("mac_brand")
-  val businessHoursMap=CommonConf.businessHoursMap
-
+  val businessHoursMap = CommonConf.businessHoursMap
+  //val sceneIdlist = CommonConf.sceneIdlist
 
   //(sceneId + "," + apMac + "," + phoneMac + "," + createTime -> rssi)
-  def  filterFuncs(record:(String, Int)): Boolean ={
+  def filterFuncs(record: (String, Int)): Boolean = {
     val arr = record._1.split(",", -1)
     val sceneId = arr(0).toInt
     val apMac = arr(1)
     val phoneMac = arr(2)
     val time = arr(3).toLong
-    if (sceneId == 0 ) return false
-    if(CommonConf.sceneIdlist.contains(sceneId)){
-      val todayDateFormat = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
-      val date = todayDateFormat.parse(todayDateFormat.format(time)).getTime
-      val openMinute = date + CommonConf.businessHoursMap(sceneId)._1 * Common.MINUTE_FORMATER
-      val closeMinute = date + CommonConf.businessHoursMap(sceneId)._2 * Common.MINUTE_FORMATER
-       return time >= openMinute && time <= closeMinute
-    }else{
+
+   // if (sceneIdlist.contains(sceneId)) {
+      if (!businessHoursMap.contains((sceneId))) {
+        return true
+      } else {
+        val todayDateFormat = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
+        val date = todayDateFormat.parse(todayDateFormat.format(time)).getTime
+        val openMinute = date + businessHoursMap(sceneId)._1 * Common.MINUTE_FORMATER
+        val closeMinute = date +businessHoursMap(sceneId)._2 * Common.MINUTE_FORMATER
+        return time >= openMinute && time <= closeMinute
+      }
+  /*  } else {
       return false
-    }
+    }*/
   }
- /*def  visitorFilter(record:Array[Byte]): Boolean ={
+
+  def visitorFilter(record: Array[Byte]): Boolean = {
 
     val visitor = Visitor.newBuilder().mergeFrom(record)
     val sceneId = visitor.getSceneId
-    if (visitor.getSceneId == 0 ) return false
-    if (!CommonConf.businessHoursMap.contains((sceneId))) return true
-
+   // if (!sceneIdlist.contains(sceneId)) return false
+    if (!businessHoursMap.contains((sceneId))) return true
     val time = visitor.getTimeStamp
     val todayDateFormat = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
     val date = todayDateFormat.parse(todayDateFormat.format(time)).getTime
     val openMinute = date + CommonConf.businessHoursMap(sceneId)._1 * Common.MINUTE_FORMATER
     val closeMinute = date + CommonConf.businessHoursMap(sceneId)._2 * Common.MINUTE_FORMATER
     time >= openMinute && time <= closeMinute
-  }*/
+  }
 
   def visitorInfo(event: Array[Byte]): Map[String, Int] = {
     val frostEvent = RssiInfo.newBuilder()
@@ -114,11 +118,11 @@ object ShopUnitFuncs {
     shopRddMap.toIterator
   }
 
-  def setIsCustomer(visitorIter: Iterator[(String,  Array[Byte])]):Iterator[(String, Array[Byte])]={
+  def setIsCustomer(visitorIter: Iterator[(String, Array[Byte])]): Iterator[(String, Array[Byte])] = {
     val shopRddMap = scala.collection.mutable.ListBuffer[(String, Array[Byte])]()
     val visitedCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_VISITED)
     visitorIter.foreach(record => {
-      val visitor = Visitor.newBuilder().clear().mergeFrom(record._2,0, record._2.length)
+      val visitor = Visitor.newBuilder().clear().mergeFrom(record._2, 0, record._2.length)
       val userMac = new String(visitor.getPhoneMac.toByteArray())
       val sceneId = visitor.getSceneId
 
