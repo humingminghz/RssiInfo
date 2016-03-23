@@ -8,7 +8,7 @@ import com.palmap.rssi.common.{MongoFactory, Common, GeneralMethods}
 import com.palmap.rssi.funcs.{HistoryFuncs, RealTimeFuncs, VisitedFuncs}
 import com.palmap.rssi.message.ShopStore.Visitor
 import kafka.serializer.{DefaultDecoder, StringDecoder}
-import org.apache.spark.SparkConf
+import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.kafka.KafkaUtils
 import org.apache.spark.streaming.{Duration, Seconds, StreamingContext}
@@ -31,20 +31,18 @@ object ShopSceneLauncher {
     sparkConf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
    // sparkConf.set("spark.kryoserializer.buffer.mb","5")
     //开启shuffle block file的合并
-    sparkConf.set("spark.shuffle.consolidateFiles", "true")
+//    sparkConf.set("spark.shuffle.consolidateFiles", "true")
     //sparkConf.set("spark.default.parallelism", "60")
     sparkConf.registerKryoClasses(Array(classOf[Visitor], classOf[Visitor.Builder]))
-
     val ssc = new StreamingContext(sparkConf, Seconds(60))
     ssc.checkpoint("frost-checkpoint")
     val kafkaParams = Map[String, String](Common.KAFKA_METADATA_BROKER -> broker_list, Common.SPARK_GROUP_ID -> group_id)
     val messagesRdd = KafkaUtils.createDirectStream[String, Array[Byte], StringDecoder, DefaultDecoder](ssc, kafkaParams, Set(topics))
     messagesRdd.count().map(x => "Received " + x + " kafka events.").print()
 
-    val visitorRdd = messagesRdd.map(x => x._2)
-
+    val visitorRdd = messagesRdd.repartition(System.getProperty("spark.default.parallelism").toInt).map(x => x._2)
     .flatMap(ShopUnitFuncs.visitorInfo _)
-  .filter(ShopUnitFuncs.filterFuncs(_))
+    .filter(ShopUnitFuncs.filterFuncs(_))
     .reduceByKey(max)
     .mapPartitions(ShopUnitFuncs.buildVisitor _)
     .reduceByKey((bytesCurVisitor, bytesNextVisitor) => {
@@ -55,7 +53,6 @@ object ShopSceneLauncher {
       //.filter(record => ShopUnitFuncs.visitorFilter(record._2))
      .cache()
 
-
     //history
     visitorRdd.foreachRDD(HistoryFuncs.saveHistory _)
     visitorRdd.count().map(cnt => "save data to History. " + new Date()).print()
@@ -63,7 +60,7 @@ object ShopSceneLauncher {
     visitorRdd.foreachRDD(VisitedFuncs.calcDwell _)
     visitorRdd.count().map(cnt => "save data to Visited. " + new Date()).print()
 
-    val realTimeRdd = visitorRdd .mapPartitions(ShopUnitFuncs.setIsCustomer _).mapPartitions(RealTimeFuncs.calRealTime _)
+    val realTimeRdd = visitorRdd.mapPartitions(ShopUnitFuncs.setIsCustomer _).mapPartitions(RealTimeFuncs.calRealTime _)
     realTimeRdd.map(RealTimeFuncs.saveMacs(_)).count().map(cnt=>("saveRealtimeRdd is ok"+new Date())).print()
     ssc.start()
     ssc.awaitTermination()

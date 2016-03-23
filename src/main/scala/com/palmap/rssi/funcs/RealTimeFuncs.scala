@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 import com.mongodb.casbah.MongoClient
-import com.mongodb.{BasicDBObject, ServerAddress}
+import com.mongodb.{WriteConcern, BasicDBObject, ServerAddress}
 import com.palmap.rssi.common.{MongoFactory, Common, GeneralMethods}
 import com.palmap.rssi.message.ShopStore.Visitor
 import org.apache.spark.rdd.RDD

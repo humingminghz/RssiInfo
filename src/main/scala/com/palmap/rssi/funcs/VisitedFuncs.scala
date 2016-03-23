@@ -3,7 +3,7 @@ package com.palmap.rssi.funcs
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import com.mongodb.BasicDBObject
+import com.mongodb.{WriteConcern, BasicDBObject}
 import com.palmap.rssi.common.{Common, MongoFactory}
 import com.palmap.rssi.message.ShopStore.Visitor
 import org.apache.spark.rdd.RDD

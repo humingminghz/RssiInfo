@@ -20,21 +20,21 @@ object ConfInfoSet {
   val todayFormat = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
   val xmlConf = GeneralMethods.getConf(Common.SPARK_CONFIG)
 
- /* def getSceneIdlist(): Unit = {
-    val url = xmlConf(Common.SHOP_SCENEIDS_URL)
-    try {
-      //xmlConf(Common.SHOP_SCENEIDS_URL)
-      val result = sendGetData(url)
-      val jsonList = new JSONArray(result)
-      println("update sceneIdlist ")
-      for (i <- 0 until jsonList.length()) {
-        CommonConf.sceneIdlist += jsonList.getInt(i)
-        print(jsonList.getInt(i))
-      }
-    }catch{
-      case e: Exception => println(url+"get wrong"+e.toString)
-    }
-  }*/
+//  def getSceneIdlist(): Unit = {
+//    val url = xmlConf(Common.SHOP_SCENEIDS_URL)
+//    try {
+//      //xmlConf(Common.SHOP_SCENEIDS_URL)
+//      val result = sendGetData(url)
+//      val jsonList = new JSONArray(result)
+//      println("update sceneIdlist ")
+//      for (i <- 0 until jsonList.length()) {
+//        CommonConf.sceneIdlist += jsonList.getInt(i)
+//        print(jsonList.getInt(i))
+//      }
+//    }catch{
+//      case e: Exception => println(url+"get wrong"+e.toString)
+//    }
+//  }
 
   def getBusinessHoursMap: Unit = {
     val businessHoursColl = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_STATICINFO)

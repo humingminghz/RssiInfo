@@ -16,7 +16,7 @@ object ShopUnitFuncs {
 
   val macBrandMap = ShopSceneFuncs.getMacBrandMap("mac_brand")
   val businessHoursMap = CommonConf.businessHoursMap
-  //val sceneIdlist = CommonConf.sceneIdlist
+//  val sceneIdlist = CommonConf.sceneIdlist
 
   //(sceneId + "," + apMac + "," + phoneMac + "," + createTime -> rssi)
   def filterFuncs(record: (String, Int)): Boolean = {
@@ -26,7 +26,7 @@ object ShopUnitFuncs {
     val phoneMac = arr(2)
     val time = arr(3).toLong
 
-   // if (sceneIdlist.contains(sceneId)) {
+//    if (sceneIdlist.contains(sceneId)) {
       if (!businessHoursMap.contains((sceneId))) {
         return true
       } else {
@@ -36,9 +36,9 @@ object ShopUnitFuncs {
         val closeMinute = date +businessHoursMap(sceneId)._2 * Common.MINUTE_FORMATER
         return time >= openMinute && time <= closeMinute
       }
-  /*  } else {
-      return false
-    }*/
+//    } else {
+//      return false
+//    }
   }
 
   def visitorFilter(record: Array[Byte]): Boolean = {
