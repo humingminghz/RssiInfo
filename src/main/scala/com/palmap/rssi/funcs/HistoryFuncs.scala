@@ -19,8 +19,8 @@ object HistoryFuncs {
     rdd.foreachPartition { partition => {
       try {
         val historyCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_HISTORY)
-
         partition.foreach(record => {
+
           val visitor = Visitor.newBuilder().mergeFrom(record._2)
           val userMac = visitor.getPhoneMac
           val sceneId = visitor.getSceneId
@@ -30,13 +30,14 @@ object HistoryFuncs {
           val date = todayDateFormat.parse(todayDate).getTime
 
           val update = new BasicDBObject
-          update.put(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_HISTORY_SHOP_TIMES, 1))
-          update.put(Common.MONGO_OPTION_PUSH, new BasicDBObject(Common.MONGO_HISTORY_SHOP_DAYS, date))
+          update.append(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_HISTORY_SHOP_TIMES, 1))
+          update.append(Common.MONGO_OPTION_PUSH, new BasicDBObject(Common.MONGO_HISTORY_SHOP_DAYS, date))
 
           val query = new BasicDBObject
-          query.put(Common.MONGO_HISTORY_SHOP_SCENEID, visitor.getSceneId)
-          query.put(Common.MONGO_HISTORY_SHOP_MAC, new String(visitor.getPhoneMac.toByteArray()))
+          query.append(Common.MONGO_HISTORY_SHOP_SCENEID, visitor.getSceneId)
+          query.append(Common.MONGO_HISTORY_SHOP_MAC, new String(visitor.getPhoneMac.toByteArray()))
           //db.shop_history.ensureIndex({"sceneId":1,"mac":1})
+          //db.shop_history.ensureIndex({"sceneId":1,"mac":1},{unique:true})
           val findQuery = new BasicDBObject(Common.MONGO_HISTORY_SHOP_DAYS, new BasicDBObject(Common.MONGO_OPTION_SLICE, List[Int](-1, 1)))
 
           var isDateExist = false

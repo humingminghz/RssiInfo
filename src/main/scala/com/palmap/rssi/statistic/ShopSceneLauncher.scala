@@ -60,8 +60,13 @@ object ShopSceneLauncher {
     visitorRdd.foreachRDD(VisitedFuncs.calcDwell _)
     visitorRdd.count().map(cnt => "save data to Visited. " + new Date()).print()
 
-    val realTimeRdd = visitorRdd.mapPartitions(ShopUnitFuncs.setIsCustomer _).mapPartitions(RealTimeFuncs.calRealTime _)
-    realTimeRdd.map(RealTimeFuncs.saveMacs(_)).count().map(cnt=>("saveRealtimeRdd is ok"+new Date())).print()
+    val realTimeRdd = visitorRdd .mapPartitions(ShopUnitFuncs.setIsCustomer _).mapPartitions(RealTimeFuncs.calRealTime _)
+    .reduceByKey((record, nextRecord) => {
+      record ++ nextRecord
+    }).cache()
+    realTimeRdd.foreachRDD(RealTimeFuncs.saveRealtimeRdd _)
+    realTimeRdd.count().map(cnt=>("saveRealtimeRdd is ok"+new Date())).print()
+
     ssc.start()
     ssc.awaitTermination()
 
