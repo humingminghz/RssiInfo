@@ -41,10 +41,10 @@ object ShopSceneLauncher {
     val messagesRdd = KafkaUtils.createDirectStream[String, Array[Byte], StringDecoder, DefaultDecoder](ssc, kafkaParams, Set(topics))
     messagesRdd.count().map(x => "Received " + x + " kafka events.").print()
 
-    val visitorRdd = messagesRdd.map(x => x._2)
+    val visitorRdd = messagesRdd.repartition(System.getProperty("spark.default.parallelism").toInt).map(x => x._2)
 
     .flatMap(ShopUnitFuncs.visitorInfo _)
-  .filter(ShopUnitFuncs.filterFuncs(_))
+    .filter(ShopUnitFuncs.filterFuncs(_))
     .reduceByKey(max)
     .mapPartitions(ShopUnitFuncs.buildVisitor _)
     .reduceByKey((bytesCurVisitor, bytesNextVisitor) => {
@@ -55,7 +55,6 @@ object ShopSceneLauncher {
       //.filter(record => ShopUnitFuncs.visitorFilter(record._2))
      .cache()
 
-
     //history
     visitorRdd.foreachRDD(HistoryFuncs.saveHistory _)
     visitorRdd.count().map(cnt => "save data to History. " + new Date()).print()
@@ -64,7 +63,12 @@ object ShopSceneLauncher {
     visitorRdd.count().map(cnt => "save data to Visited. " + new Date()).print()
 
     val realTimeRdd = visitorRdd .mapPartitions(ShopUnitFuncs.setIsCustomer _).mapPartitions(RealTimeFuncs.calRealTime _)
-    realTimeRdd.map(RealTimeFuncs.saveMacs(_)).count().map(cnt=>("saveRealtimeRdd is ok"+new Date())).print()
+    .reduceByKey((record, nextRecord) => {
+      record ++ nextRecord
+    }).cache()
+    realTimeRdd.foreachRDD(RealTimeFuncs.saveRealtimeRdd _)
+    realTimeRdd.count().map(cnt=>("saveRealtimeRdd is ok"+new Date())).print()
+
     ssc.start()
     ssc.awaitTermination()
 
