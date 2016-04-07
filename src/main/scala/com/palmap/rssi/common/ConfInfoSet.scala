@@ -20,21 +20,20 @@ object ConfInfoSet {
   val todayFormat = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
   val xmlConf = GeneralMethods.getConf(Common.SPARK_CONFIG)
 
-//  def getSceneIdlist(): Unit = {
-//    val url = xmlConf(Common.SHOP_SCENEIDS_URL)
-//    try {
-//      //xmlConf(Common.SHOP_SCENEIDS_URL)
-//      val result = sendGetData(url)
-//      val jsonList = new JSONArray(result)
-//      println("update sceneIdlist ")
-//      for (i <- 0 until jsonList.length()) {
-//        CommonConf.sceneIdlist += jsonList.getInt(i)
-//        print(jsonList.getInt(i))
-//      }
-//    }catch{
-//      case e: Exception => println(url+"get wrong"+e.toString)
-//    }
-//  }
+  def getSceneIdlist(): Unit = {
+    val url = xmlConf(Common.SHOP_SCENEIDS_URL)
+    try {
+      val result = sendGetData(url)
+      val jsonList = new JSONArray(result)
+      println("update sceneIdlist ")
+      for (i <- 0 until jsonList.length()) {
+        CommonConf.sceneIdlist += jsonList.getInt(i)
+        print("   " + jsonList.getInt(i))
+      }
+    }catch{
+      case e: Exception => println(url+"get wrong"+e.toString)
+    }
+  }
 
   def getBusinessHoursMap: Unit = {
     val businessHoursColl = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_STATICINFO)
@@ -71,9 +70,6 @@ object ConfInfoSet {
       getUrl = new URL(get_url)
       connection = getUrl.openConnection.asInstanceOf[HttpURLConnection]
       connection.addRequestProperty("Accept", "application/json")
-      //connection.addRequestProperty("NAG-Key", appKey)
-      //      connection.addRequestProperty("NAG-Key", "3313e3d0712f48eda7e2a855b0048dee") //api.ipalmap.com
-      //            connection.addRequestProperty("NAG-Key", "31ec1f95aded4d0c82ff70e81eafe274") //172.16.10.25
       connection.setConnectTimeout(30000)
       connection.setReadTimeout(30000)
       connection.connect

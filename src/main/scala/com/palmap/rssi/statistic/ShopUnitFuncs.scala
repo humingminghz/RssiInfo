@@ -9,6 +9,7 @@ import com.palmap.rssi.common.{CommonConf, Common, GeneralMethods, MongoFactory}
 import com.palmap.rssi.message.FrostEvent.{IdType, RssiInfo, StubType}
 import com.palmap.rssi.message.ShopStore.Visitor
 import scala.collection.JavaConversions._
+import scala.collection.mutable.{ListBuffer, ArrayBuffer}
 
 object ShopUnitFuncs {
 
@@ -16,18 +17,16 @@ object ShopUnitFuncs {
 
   val macBrandMap = ShopSceneFuncs.getMacBrandMap("mac_brand")
   val businessHoursMap = CommonConf.businessHoursMap
-//  val sceneIdlist = CommonConf.sceneIdlist
+  val sceneIdlist = CommonConf.sceneIdlist
 
   //(sceneId + "," + apMac + "," + phoneMac + "," + createTime -> rssi)
   def filterFuncs(record: (String, Int)): Boolean = {
     val arr = record._1.split(",", -1)
     val sceneId = arr(0).toInt
-    val apMac = arr(1)
-    val phoneMac = arr(2)
     val time = arr(3).toLong
 
-//    if (sceneIdlist.contains(sceneId)) {
-      if (!businessHoursMap.contains((sceneId))) {
+    if (sceneIdlist.contains(sceneId)) {
+      if (!businessHoursMap.contains(sceneId)) {
         return true
       } else {
         val todayDateFormat = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
@@ -36,24 +35,116 @@ object ShopUnitFuncs {
         val closeMinute = date +businessHoursMap(sceneId)._2 * Common.MINUTE_FORMATER
         return time >= openMinute && time <= closeMinute
       }
-//    } else {
-//      return false
-//    }
+    } else {
+      return false
+    }
   }
 
-  def visitorFilter(record: Array[Byte]): Boolean = {
 
-    val visitor = Visitor.newBuilder().mergeFrom(record)
-    val sceneId = visitor.getSceneId
-   // if (!sceneIdlist.contains(sceneId)) return false
-    if (!businessHoursMap.contains((sceneId))) return true
-    val time = visitor.getTimeStamp
-    val todayDateFormat = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
-    val date = todayDateFormat.parse(todayDateFormat.format(time)).getTime
-    val openMinute = date + CommonConf.businessHoursMap(sceneId)._1 * Common.MINUTE_FORMATER
-    val closeMinute = date + CommonConf.businessHoursMap(sceneId)._2 * Common.MINUTE_FORMATER
-    time >= openMinute && time <= closeMinute
+  def visitorInfo1(visitor: Array[Byte]): Map[String, ArrayBuffer[Int]] = {
+    val visitorBuilder = RssiInfo.newBuilder().mergeFrom(visitor, 0, visitor.length)
+    var visitorMap = Map[String, ArrayBuffer[Int]]()
+    if (visitorBuilder.hasSceneId && visitorBuilder.hasTimestamp && visitorBuilder.hasIdData && visitorBuilder.getIdType == IdType.MAC && visitorBuilder.getStubType == StubType.AP) {
+      val sceneId = visitorBuilder.getSceneId
+      val timeStamp = visitorBuilder.getTimestamp
+      val sdf = new SimpleDateFormat(Common.NOW_MINUTE_FORMAT)
+      val dateStr = sdf.format(new Date(timeStamp))
+      val minuteTime = sdf.parse(dateStr).getTime
+
+      val currentDate = new Date()
+      val currentTime = sdf.parse(sdf.format(currentDate)).getTime
+      //过滤本批次要处理的数据
+      if (minuteTime == (currentTime - Common.MINUTE_FORMATER)) {
+        visitorBuilder.getItemsList.foreach(item => {
+          if (item.hasIdData && item.hasRssi && item.getIdType == IdType.MAC) {
+            val userMac = item.getIdData
+            val rssi = item.getRssi
+            val key = sceneId + Common.CTRL_A + userMac + Common.CTRL_A + minuteTime
+            var rssiList = ArrayBuffer[Int]()
+            if (visitorMap.contains(key)) {
+              rssiList = visitorMap(key)
+            }
+
+            rssiList += rssi
+            visitorMap += (sceneId  + Common.CTRL_A + userMac + Common.CTRL_A + minuteTime -> rssiList)
+          }
+        })
+
+      }
+
+    }
+
+    visitorMap
   }
+
+  /**
+   * 营业时间过滤
+   * @return
+   */
+  def filterBusinessVisitor(partition: Iterator[(String, ArrayBuffer[Int])]): Iterator[(String, ArrayBuffer[Int])] = {
+    val recordList = ListBuffer[(String, ArrayBuffer[Int])]()
+    partition.grouped(3)
+    partition.foreach(record => {
+      val info = record._1.split(Common.CTRL_A, -1)
+      val sceneId = info(0).toInt
+      val minuteTime = info(2).toLong
+
+      if (CommonConf.sceneIdlist.contains(sceneId)) {
+        var isFlag = false
+        if (CommonConf.businessHoursMap.contains(sceneId)) {
+          val todayDateFormat = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
+          val date = todayDateFormat.parse(todayDateFormat.format(minuteTime)).getTime
+
+          val openMinute = date + CommonConf.businessHoursMap(sceneId)._1 * Common.MINUTE_FORMATER
+          val closeMinute = date + CommonConf.businessHoursMap(sceneId)._2 * Common.MINUTE_FORMATER
+          isFlag = minuteTime >= openMinute && minuteTime <= closeMinute
+
+        } else {
+          isFlag = true
+        }
+
+        if (isFlag) {
+          recordList += record
+        }
+
+      }
+    })
+
+    recordList.toIterator
+  }
+
+  def buildVisitor1(iter: Iterator[(String, ArrayBuffer[Int])]): Iterator[(String, Array[Byte])] = {
+    val reList = ListBuffer[(String, Array[Byte])]()
+
+    iter.foreach(event => {
+      val keyInfo = event._1.split(Common.CTRL_A, -1)
+      val sceneId = keyInfo(0).toInt
+      val phoneMac = keyInfo(1)
+      val minuteTime = keyInfo(2).toLong
+      println( phoneMac + " ----------------- " + event._2)
+      val rssiList = event._2.sorted
+      println("sorted ele: " + rssiList(rssiList.length - 1))
+
+      val phoneMacKey = phoneMac.substring(0, Common.MAC_KEY_LENGTH)
+      var phoneBrand = Common.BRAND_UNKNOWN
+      if (macBrandMap.contains(phoneMacKey)) {
+        phoneBrand = macBrandMap(phoneMacKey)
+      }
+
+      val visitor = Visitor.newBuilder()
+        .setSceneId(sceneId)
+        .setPhoneMac(ByteString.copyFrom(phoneMac.getBytes()))
+        .setTimeStamp(minuteTime)
+        .setIsCustomer(false)
+        .setPhoneBrand(ByteString.copyFrom(phoneBrand.getBytes()))
+        .addRssi(rssiList(rssiList.length - 1))
+
+      reList += ((event._1, visitor.build().toByteArray))
+    })
+
+    reList.toIterator
+  }
+
 
   def visitorInfo(event: Array[Byte]): Map[String, Int] = {
     val frostEvent = RssiInfo.newBuilder()
@@ -78,8 +169,7 @@ object ShopUnitFuncs {
           })
         }
       }
-    }
-    catch {
+    } catch {
       case e: Exception => e.getStackTrace
     }
 
@@ -96,7 +186,6 @@ object ShopUnitFuncs {
       val phoneMac = arr(2)
       val timeStamp = arr(3).toLong
       val rssi = visitor._2.toInt
-
 
       val phoneMacKey = phoneMac.substring(0, Common.MAC_KEY_LENGTH)
       var phoneBrand = Common.BRAND_UNKNOWN

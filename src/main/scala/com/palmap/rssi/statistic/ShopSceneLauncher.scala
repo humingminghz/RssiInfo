@@ -40,35 +40,42 @@ object ShopSceneLauncher {
     val messagesRdd = KafkaUtils.createDirectStream[String, Array[Byte], StringDecoder, DefaultDecoder](ssc, kafkaParams, Set(topics))
     messagesRdd.count().map(x => "Received " + x + " kafka events.").print()
 
-    val visitorRdd = messagesRdd.repartition(System.getProperty("spark.default.parallelism").toInt).map(x => x._2)
-    .flatMap(ShopUnitFuncs.visitorInfo _)
-    .filter(ShopUnitFuncs.filterFuncs(_))
-    .reduceByKey(max)
-    .mapPartitions(ShopUnitFuncs.buildVisitor _)
-    .reduceByKey((bytesCurVisitor, bytesNextVisitor) => {
-      val curVisitor = Visitor.newBuilder().clear().mergeFrom(bytesCurVisitor, 0, bytesCurVisitor.length)
-      curVisitor.mergeFrom(bytesNextVisitor, 0, bytesNextVisitor.length)
-      curVisitor.build().toByteArray()
-    })
-      //.filter(record => ShopUnitFuncs.visitorFilter(record._2))
-     .cache()
+    val visitorRdd = messagesRdd.map(_._2)
+      .flatMap(ShopUnitFuncs.visitorInfo1)
+      .mapPartitions(ShopUnitFuncs.filterBusinessVisitor)
+      .reduceByKey((record, nextRecord) => record ++ nextRecord)
+      .mapPartitions(ShopUnitFuncs.buildVisitor1)
+      .cache()
+
+//    //.repartition(System.getProperty("spark.default.parallelism").toInt)
+//    val visitorRdd = messagesRdd.map(x => x._2)
+//    .flatMap(ShopUnitFuncs.visitorInfo _)
+//    .filter(ShopUnitFuncs.filterFuncs _)
+//    .reduceByKey(max)
+//    .mapPartitions(ShopUnitFuncs.buildVisitor _)
+//    .reduceByKey((bytesCurVisitor, bytesNextVisitor) => {
+//      val curVisitor = Visitor.newBuilder().clear().mergeFrom(bytesCurVisitor, 0, bytesCurVisitor.length)
+//      curVisitor.mergeFrom(bytesNextVisitor, 0, bytesNextVisitor.length)
+//      curVisitor.build().toByteArray()
+//    })
+//      //.filter(record => ShopUnitFuncs.visitorFilter(record._2))
+//     .cache()
 
     //history
     visitorRdd.foreachRDD(HistoryFuncs.saveHistory _)
-    visitorRdd.count().map(cnt => "save data to History. " + new Date()).print()
-    //Visited
-    visitorRdd.foreachRDD(VisitedFuncs.calcDwell _)
-    visitorRdd.count().map(cnt => "save data to Visited. " + new Date()).print()
+    visitorRdd.count().map("process " + _ + " data; save data to History. " + new Date()).print
 
-    val realTimeRdd = visitorRdd .mapPartitions(ShopUnitFuncs.setIsCustomer _).mapPartitions(RealTimeFuncs.calRealTime _)
-    .reduceByKey((record, nextRecord) => {
-      record ++ nextRecord
-    }).cache()
-    realTimeRdd.foreachRDD(RealTimeFuncs.saveRealtimeRdd _)
-    realTimeRdd.count().map(cnt=>("saveRealtimeRdd is ok"+new Date())).print()
+    //Visited  calcDwellIsCustomer
+    val realTimeRdd = visitorRdd.mapPartitions(VisitedFuncs.calVisitorDwell _)
+      .mapPartitions(RealTimeFuncs.calRealTime _)
+      .reduceByKey((record, nextRecord) => record ++ nextRecord)
+      .cache()
+    realTimeRdd.count().map("process " +_ + " data; save data to calVisitorDwell. " + new Date()).print
+
+    realTimeRdd.foreachRDD(RealTimeFuncs.saveRealTime _)
+    realTimeRdd.count().map("process " +_ + " data; save data to realTime. " + new Date()).print
 
     ssc.start()
     ssc.awaitTermination()
-
   }
 }

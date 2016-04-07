@@ -20,6 +20,8 @@ public class Common {
 	public static final String NOW_HOUR_FORMAT = "yyyy-MM-dd HH:00:00";
 	public static final String TODAY_FIRST_TS_FORMAT = "yyyy-MM-dd 00:00:00";
 
+	public static final String ZK_MAP_MONITOR_PATH="zk.map.monitor.path";
+	public static final String ZOOKEEPER_QUORUM="zkQuorum";
 	public static final int CUSTOMER_VALUE = 0;
 	public static final int PASSENGER_VALUE = 1;
 	public static final int EMPLOYEE_VALUE  = 2;

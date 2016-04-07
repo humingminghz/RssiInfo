@@ -10,16 +10,15 @@ import org.apache.curator.utils.EnsurePath
  */
 object ZKMonitor {
   val xmlConf = GeneralMethods.getConf(Common.SPARK_CONFIG)
-  val ZK_CONF_MONITOR_PATH="/nova/conf"
+  val zkMapMonitorPath=xmlConf(Common.ZK_MAP_MONITOR_PATH)
   def startMonitor()={
     val retryPolicy=new ExponentialBackoffRetry(1000,3)
-
-    val client:CuratorFramework=CuratorFrameworkFactory.newClient(xmlConf("zkQuorum"),retryPolicy)
+    val client:CuratorFramework=CuratorFrameworkFactory.newClient(xmlConf(Common.ZOOKEEPER_QUORUM),retryPolicy)
     client.start()
-    val   confEnsurePath:EnsurePath=client.newNamespaceAwareEnsurePath(ZK_CONF_MONITOR_PATH)
+    val confEnsurePath:EnsurePath=client.newNamespaceAwareEnsurePath(zkMapMonitorPath)
     confEnsurePath.ensure(client.getZookeeperClient)
 
-   val nodeMonitor=confNodeCache(client,ZK_CONF_MONITOR_PATH)
+    val nodeMonitor=confNodeCache(client,zkMapMonitorPath)
     nodeMonitor.start(true)
     println("start zk monitor....")
   }
@@ -31,7 +30,7 @@ object ZKMonitor {
         val znodeData = new String(cache.getCurrentData.getData)
         println("confNodeCache changed, data is: " + znodeData)
         try {
-//          ConfInfoSet.getSceneIdlist()
+          ConfInfoSet.getSceneIdlist()
 
           val info = znodeData.split(Common.CTRL_A, -1)
           info(0) match {
