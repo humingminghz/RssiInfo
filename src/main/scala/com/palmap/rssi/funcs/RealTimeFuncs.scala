@@ -23,7 +23,6 @@ object RealTimeFuncs {
       val sceneId = visitor.getSceneId
       val isCustomer = visitor.getIsCustomer
       val minuteTime = visitor.getTimeStamp
-      val mac = new String(visitor.getPhoneMac.toByteArray)
 
       val macs = scala.collection.mutable.Set[String]()
       macs += new String(visitor.getPhoneMac.toByteArray)

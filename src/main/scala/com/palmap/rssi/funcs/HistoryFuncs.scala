@@ -21,9 +21,9 @@ object HistoryFuncs {
         partition.foreach(param => {
           val visitorBuilder = Visitor.newBuilder().mergeFrom(param._2, 0, param._2.length)
           val sceneId = visitorBuilder.getSceneId
-          val mac = new String(visitorBuilder.getPhoneMac.toByteArray)
+          val mac = new String(visitorBuilder.getPhoneMac.toByteArray())
           val minuteTime = visitorBuilder.getTimeStamp
-
+          println("HistoryFuncs mac: " + mac)
           val sdf = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
           val dayTime = sdf.parse(sdf.format(new Date(minuteTime))).getTime
 
