@@ -16,9 +16,13 @@ public class Common {
 
 	public static final char BATCH_INTERVAL_IN_MILLI_SEC = 60000;
 	public static final int MINUTE_FORMATER  = 60000;
+	public static final int DEFAULT_MACHINE_CHECK_MINUTE = 2* 60;
 	public static final String NOW_MINUTE_FORMAT = "yyyy-MM-dd HH:mm:00";
 	public static final String NOW_HOUR_FORMAT = "yyyy-MM-dd HH:00:00";
 	public static final String TODAY_FIRST_TS_FORMAT = "yyyy-MM-dd 00:00:00";
+	public static final int HOUR_FORMATER = MINUTE_FORMATER * 60;
+	public static final int DAY_FORMATER  = MINUTE_FORMATER * 60 * 24;
+	public static final int DEFAULT_MACHINE_CHECK_TIMES = 4;
 
 	public static final String ZK_MAP_MONITOR_PATH="zk.map.monitor.path";
 	public static final String ZOOKEEPER_QUORUM="zkQuorum";
@@ -53,6 +57,7 @@ public class Common {
 	public static final String MONGO_OPTION_ALL  = "$all";
 	public static final String MONGO_OPTION_SIZE  = "$size";
 	public static final String MONGO_OPTION_ADDTOSET  = "$addToSet";
+	public static final String MONGO_OPTION_IN = "$in";
 
 	public static final String MONGO_COLLECTION_SHOP_HISTORY = "shop_history";
 	public static final String MONGO_HISTORY_SHOP_SCENEID = "sceneId";
