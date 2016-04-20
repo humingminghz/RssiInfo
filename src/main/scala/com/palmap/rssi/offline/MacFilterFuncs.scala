@@ -22,18 +22,18 @@ object MacFilterFuncs {
         val mac=record._1._2
 
         val dateList = (0 to 6).map(num => record._2 - num * Common.DAY_FORMATER).toList
-        val query = new BasicDBObject()
-          .append(Common.MONGO_SHOP_VISITED_DATE, new BasicDBObject(Common.MONGO_OPTION_IN, dateList))
-          .append(Common.MONGO_HISTORY_SHOP_SCENEID, sceneId)
-          .append(Common.MONGO_HISTORY_SHOP_MAC, mac)
-        val findQuery = new BasicDBObject(Common.MONGO_SHOP_VISITED_DWELL, 1)
-        val dwellList = visitedCollection.find(query, findQuery).toList
-        if (!dwellList.isEmpty) {
-          var machineTimes = 0
-          dwellList.foreach(dwell => {
-            if (dwell.get(Common.MONGO_SHOP_VISITED_DWELL).toString.toInt >= Common.DEFAULT_MACHINE_CHECK_MINUTE)
-              machineTimes += 1
-          })
+          val query = new BasicDBObject()
+            .append(Common.MONGO_SHOP_VISITED_DATE, new BasicDBObject(Common.MONGO_OPTION_IN, dateList))
+            .append(Common.MONGO_HISTORY_SHOP_SCENEID, sceneId)
+            .append(Common.MONGO_HISTORY_SHOP_MAC, mac)
+          val findQuery = new BasicDBObject(Common.MONGO_SHOP_VISITED_DWELL, 1)
+          val dwellList = visitedCollection.find(query, findQuery).toList
+          if (!dwellList.isEmpty) {
+            var machineTimes = 0
+            dwellList.foreach(dwell => {
+              if (dwell.get(Common.MONGO_SHOP_VISITED_DWELL).toString.toInt >= Common.DEFAULT_MACHINE_CHECK_MINUTE)
+                machineTimes += 1
+            })
           if (machineTimes >= Common.DEFAULT_MACHINE_CHECK_TIMES) ret.add(record._1._2)
         }
       })

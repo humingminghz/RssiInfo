@@ -9,7 +9,6 @@ import com.palmap.rssi.common.{MongoFactory, GeneralMethods, CommonConf, Common}
 import com.palmap.rssi.message.FrostEvent.{StubType, IdType, RssiInfo}
 import com.palmap.rssi.message.ShopStore.Visitor
 import com.palmap.rssi.statistic.ShopSceneFuncs
-import com.palmaplus.frost.common.Common
 import org.apache.hadoop.io.BytesWritable
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -47,6 +46,7 @@ object UnitFuncs {
             val key = sceneId + Common.CTRL_A + userMac + Common.CTRL_A + minuteTime
 
             visitorMap += (sceneId  + Common.CTRL_A + userMac + Common.CTRL_A + minuteTime -> rssi)
+
           }
         })
     }
@@ -57,11 +57,10 @@ object UnitFuncs {
    * @return
    */
   def filterFuncs(record: (String, Int)): Boolean = {
-    val arr = record._1.split(",", -1)
+    val arr = record._1.split(Common.CTRL_A, -1)
     val sceneId = arr(0).toInt
-    val apMac = arr(1)
-    val phoneMac = arr(2)
-    val time = arr(3).toLong
+    val phoneMac = arr(1)
+    val time = arr(2).toLong
     val rssi= record._2
     if(rssi < -70){
       return false
@@ -97,6 +96,7 @@ object UnitFuncs {
       if (macBrandMap.contains(phoneMacKey)) {
         phoneBrand = macBrandMap(phoneMacKey)
       }
+    println(sceneId  + Common.CTRL_A + phoneMac + Common.CTRL_A + minuteTime+Common.CTRL_A +phoneBrand)
     (sceneId  + Common.CTRL_A + phoneMac + Common.CTRL_A + minuteTime+Common.CTRL_A +phoneBrand)
   }
 

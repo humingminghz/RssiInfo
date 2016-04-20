@@ -27,19 +27,21 @@ object ShopSceneLauncher {
     System.setProperty("spark.storage.memoryFraction", "0.4")
     System.setProperty("spark.shuffle.io.preferDirectBufs", "false")
 
+    val machineFilePath = args(0)
+
     val sparkConf = new SparkConf().setAppName("frost-launcher")
     sparkConf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
    // sparkConf.set("spark.kryoserializer.buffer.mb","5")
     //开启shuffle block file的合并
-//    sparkConf.set("spark.shuffle.consolidateFiles", "true")
-    //sparkConf.set("spark.default.parallelism", "60")
+    sparkConf.set("spark.shuffle.consolidateFiles", "true")
+
     sparkConf.registerKryoClasses(Array(classOf[Visitor], classOf[Visitor.Builder]))
     val ssc = new StreamingContext(sparkConf, Seconds(60))
     ssc.checkpoint("frost-checkpoint")
     val kafkaParams = Map[String, String](Common.KAFKA_METADATA_BROKER -> broker_list, Common.SPARK_GROUP_ID -> group_id)
     val messagesRdd = KafkaUtils.createDirectStream[String, Array[Byte], StringDecoder, DefaultDecoder](ssc, kafkaParams, Set(topics))
     messagesRdd.count().map(x => "Received " + x + " kafka events.").print()
-    KafkaUtils.createStream()
+
     val visitorRdd = messagesRdd.map(_._2)
       .flatMap(ShopUnitFuncs.visitorInfo1)
       .mapPartitions(ShopUnitFuncs.filterBusinessVisitor)
@@ -53,7 +55,7 @@ object ShopSceneLauncher {
 //    .filter(ShopUnitFuncs.filterFuncs _)
 //    .reduceByKey(max)
 //    .mapPartitions(ShopUnitFuncs.buildVisitor _)
-//    .reduceByKey((bytesCurVisitor, bytesNextVisitor) => {
+//    .reduceB yKey((bytesCurVisitor, bytesNextVisitor) => {
 //      val curVisitor = Visitor.newBuilder().clear().mergeFrom(bytesCurVisitor, 0, bytesCurVisitor.length)
 //      curVisitor.mergeFrom(bytesNextVisitor, 0, bytesNextVisitor.length)
 //      curVisitor.build().toByteArray()
@@ -65,15 +67,17 @@ object ShopSceneLauncher {
     visitorRdd.foreachRDD(HistoryFuncs.saveHistory _)
     visitorRdd.count().map("process " + _ + " data; save data to History. " + new Date()).print
 
+    val visitorDwellRDD= visitorRdd.mapPartitions(VisitedFuncs.calVisitorDwell _).cache()
     //Visited  calcDwellIsCustomer
-    val realTimeRdd = visitorRdd.mapPartitions(VisitedFuncs.calVisitorDwell _)
-      .mapPartitions(RealTimeFuncs.calRealTime _)
+    val realTimeRdd = visitorDwellRDD.mapPartitions(RealTimeFuncs.calRealTime _)
       .reduceByKey((record, nextRecord) => record ++ nextRecord)
       .cache()
     realTimeRdd.count().map("process " +_ + " data; save data to calVisitorDwell. " + new Date()).print
 
     realTimeRdd.foreachRDD(RealTimeFuncs.saveRealTime _)
     realTimeRdd.count().map("process " +_ + " data; save data to realTime. " + new Date()).print
+
+
 
     ssc.start()
     ssc.awaitTermination()

@@ -27,6 +27,9 @@ object ShopSceneLauncher {
 
     val sc = new SparkContext(sparkConf)
 
+    println(inputPath)
+    println(dataDate)
+    println(machineFilePath)
     val visitorRdd = sc.sequenceFile(inputPath, classOf[LongWritable], classOf[BytesWritable])
       .map(_._2)
       .flatMap(UnitFuncs.visitorInfo1)
@@ -34,7 +37,7 @@ object ShopSceneLauncher {
       .reduceByKey((record, nextRecord) => 1)
       .map(UnitFuncs.bulidMessage)
       .cache()
-
+    //println(visitorRdd)
     val dayDailyRDD=visitorRdd.map(UnitFuncs.mergrVisitor(_))
       .aggregateByKey(List[Long]())(UnitFuncs.seqVisitor, UnitFuncs.combVisitor)
       .mapPartitions(UnitFuncs.setIsCustomer _).cache()
@@ -65,7 +68,7 @@ object ShopSceneLauncher {
     machineRdd.saveAsTextFile(machineFilePath)
 
 
-    print("process " + _ + " data; save data to History. " + new Date())
+
 
   }
 

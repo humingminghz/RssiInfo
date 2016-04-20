@@ -1,14 +1,15 @@
 package com.palmap.rssi.common
 
-import java.io.{ByteArrayOutputStream, BufferedReader}
+import java.io.{InputStreamReader, ByteArrayOutputStream, BufferedReader}
 import java.net.{HttpURLConnection, URL}
 import java.text.SimpleDateFormat
 
 import com.mongodb.{BasicDBObject, ServerAddress}
-import com.mongodb.casbah.MongoClient
+
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.{Path, FileSystem}
 import org.json.JSONArray
 
-import scala.collection.mutable
 import scala.collection.mutable.{HashMap, ListBuffer}
 import scala.io.Source
 
@@ -19,6 +20,28 @@ object ConfInfoSet {
 
   val todayFormat = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
   val xmlConf = GeneralMethods.getConf(Common.SPARK_CONFIG)
+  //get machine macs set
+  def getMachineSet(fileName: String): Unit = {
+    Source.fromFile(fileName).getLines()
+      .foreach { line =>
+        val mac = line.trim()
+        CommonConf.machineSet.add(mac)
+      }
+  }
+
+  //update machine set
+  def updateMachineSet() = {
+    val fileSystem = FileSystem.get(new Configuration())
+    val in = fileSystem.open(new Path(Common.MACHINE_SET_PATH))
+    val bufferedReader = new BufferedReader(new InputStreamReader(in))
+    var line = ""
+    while ({ line=bufferedReader.readLine(); line != null }) {
+      CommonConf.machineSet.add(line.trim)
+    }
+    if (bufferedReader != null) bufferedReader.close()
+    if (in != null) in.close()
+    if (fileSystem != null) fileSystem.close()
+  }
 
   def getSceneIdlist(): Unit = {
     val url = xmlConf(Common.SHOP_SCENEIDS_URL)

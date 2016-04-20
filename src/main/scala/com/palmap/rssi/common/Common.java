@@ -4,6 +4,10 @@
 package com.palmap.rssi.common;
 
 public class Common {
+	public static final String MACHINE_SET_FILE = "machine_list";
+	public static final String ZK_MACHINE_SET = "machineSet";
+	public static final String MACHINE_SET_PATH = "/com/palmaplus/rssi/conf/machine_new";
+
 	public static final String BRAND_UNKNOWN    = "unknown";
 	public static final String SHOP_SCENEIDS_URL="sceneIdsUrl";
 
@@ -16,13 +20,13 @@ public class Common {
 
 	public static final char BATCH_INTERVAL_IN_MILLI_SEC = 60000;
 	public static final int MINUTE_FORMATER  = 60000;
-	public static final int DEFAULT_MACHINE_CHECK_MINUTE = 2* 60;
+	public static final int DEFAULT_MACHINE_CHECK_MINUTE = 2* 5;
 	public static final String NOW_MINUTE_FORMAT = "yyyy-MM-dd HH:mm:00";
 	public static final String NOW_HOUR_FORMAT = "yyyy-MM-dd HH:00:00";
 	public static final String TODAY_FIRST_TS_FORMAT = "yyyy-MM-dd 00:00:00";
 	public static final int HOUR_FORMATER = MINUTE_FORMATER * 60;
 	public static final int DAY_FORMATER  = MINUTE_FORMATER * 60 * 24;
-	public static final int DEFAULT_MACHINE_CHECK_TIMES = 4;
+	public static final int DEFAULT_MACHINE_CHECK_TIMES = 1;
 
 	public static final String ZK_MAP_MONITOR_PATH="zk.map.monitor.path";
 	public static final String ZOOKEEPER_QUORUM="zkQuorum";
