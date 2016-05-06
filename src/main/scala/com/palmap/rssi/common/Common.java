@@ -69,6 +69,12 @@ public class Common {
 	public static final String MONGO_HISTORY_SHOP_TIMES = "times";
 	public static final String MONGO_HISTORY_SHOP_DAYS = "days";
 
+	public static final String MONGO_COLLECTION_SHOP_DAY_INFO = "shop_day_info";
+	public static final String MONGO_HISTORY_SHOP_DAY_INFO_SCENEID = "sceneId";
+	public static final String MONGO_HISTORY_SHOP_DAY_INFO_DATE = "date";
+	public static final String MONGO_HISTORY_SHOP_DAY_INFO_COUNT = "count";
+	public static final String MONGO_HISTORY_SHOP_DAY_INFO_DWELL = "dwell";
+
 	public static final String MONGO_COLLECTION_SHOP_VISITED = "shop_visited";
 	public static final String MONGO_SHOP_VISITED_DATE = "date";
 	public static final String MONGO_SHOP_VISITED_SCENEID = "sceneId";

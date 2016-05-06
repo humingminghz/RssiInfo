@@ -31,16 +31,19 @@ object RealTimeOffline {
             .append(Common.MONGO_SHOP_REALTIME_SCENEID, sceneId)
             .append(Common.MONGO_SHOP_REALTIME_ISCUSTOMER, isCustomer)
 
+
           val updateBasic = new BasicDBObject()
-            .append(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_SHOP_REALTIME_MACSUM, macList.size))
-            .append(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_SHOP_REALTIME_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
+            .append(Common.MONGO_SHOP_REALTIME_MACSUM, macList.size)
+            .append(Common.MONGO_SHOP_REALTIME_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList))
+
+          //  .append(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_SHOP_REALTIME_MACSUM, macList.size))
+          //  .append(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_SHOP_REALTIME_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
 
           realTimeCollection.update(queryBasic, updateBasic, true)
         })
       }catch {
         case e: Exception => e.printStackTrace()
        }
-
   }
 
   // (sceneId,hour,isCustomer),HashSet[mac])

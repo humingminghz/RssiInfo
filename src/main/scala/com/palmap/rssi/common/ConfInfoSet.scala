@@ -3,6 +3,7 @@ package com.palmap.rssi.common
 import java.io.{InputStreamReader, ByteArrayOutputStream, BufferedReader}
 import java.net.{HttpURLConnection, URL}
 import java.text.SimpleDateFormat
+import java.util.Date
 
 import com.mongodb.{BasicDBObject, ServerAddress}
 
@@ -31,6 +32,7 @@ object ConfInfoSet {
 
   //update machine set
   def updateMachineSet() = {
+    println("before updata machine set:"+  CommonConf.machineSet.size)
     val fileSystem = FileSystem.get(new Configuration())
     val in = fileSystem.open(new Path(Common.MACHINE_SET_PATH))
     val bufferedReader = new BufferedReader(new InputStreamReader(in))
@@ -38,6 +40,7 @@ object ConfInfoSet {
     while ({ line=bufferedReader.readLine(); line != null }) {
       CommonConf.machineSet.add(line.trim)
     }
+    println("after updata machine set:"+  CommonConf.machineSet.size)
     if (bufferedReader != null) bufferedReader.close()
     if (in != null) in.close()
     if (fileSystem != null) fileSystem.close()

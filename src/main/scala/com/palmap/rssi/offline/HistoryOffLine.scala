@@ -58,4 +58,32 @@ object HistoryOffLine {
     }
 
 
+  def saveDayInfo(partition: Iterator[(Int,Long,Int,Int)]): Unit = {
+
+    try {
+      val historyCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_DAY_INFO)
+      partition.foreach(  record => {
+        val sceneId =record._1
+        val date=record._2
+        val count =record._3
+        val dwell=record._4
+        val queryBasic = new BasicDBObject()
+          .append(Common.MONGO_HISTORY_SHOP_DAY_INFO_SCENEID, sceneId)
+          .append(Common.MONGO_HISTORY_SHOP_DAY_INFO_DATE, date)
+
+        val updateBasic = new BasicDBObject()
+          .append(Common.MONGO_HISTORY_SHOP_DAY_INFO_COUNT,count)
+          .append(Common.MONGO_HISTORY_SHOP_DAY_INFO_DWELL,dwell)
+         val updateCol = new BasicDBObject()
+          .append(Common.MONGO_OPTION_SET, updateBasic)
+        historyCollection.update(queryBasic,updateCol,true)
+
+      })
+    } catch {
+      case e: Exception => e.getStackTrace
+    }
+
+
+  }
+
 }

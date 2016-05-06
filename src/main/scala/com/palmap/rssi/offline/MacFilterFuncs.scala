@@ -19,7 +19,7 @@ object MacFilterFuncs {
 
       partition.foreach(record => {
         val sceneId=record._1._1
-        val mac=record._1._2
+        val mac=record._1._2.toLowerCase()
 
         val dateList = (0 to 6).map(num => record._2 - num * Common.DAY_FORMATER).toList
           val query = new BasicDBObject()

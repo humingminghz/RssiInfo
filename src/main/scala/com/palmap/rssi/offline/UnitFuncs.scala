@@ -10,6 +10,7 @@ import com.palmap.rssi.message.FrostEvent.{StubType, IdType, RssiInfo}
 import com.palmap.rssi.message.ShopStore.Visitor
 import com.palmap.rssi.statistic.ShopSceneFuncs
 import org.apache.hadoop.io.BytesWritable
+import org.apache.spark.rdd.RDD
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.collection.mutable.{ListBuffer, ArrayBuffer}
@@ -62,9 +63,10 @@ object UnitFuncs {
     val phoneMac = arr(1)
     val time = arr(2).toLong
     val rssi= record._2
-    if(rssi < -70){
+ /*   if(rssi < -70){
       return false
-    } else if (sceneIdlist.contains(sceneId)) {
+    } else */
+    if (sceneIdlist.contains(sceneId)) {
       if (!businessHoursMap.contains((sceneId))) {
         return true
       } else {
@@ -173,6 +175,13 @@ object UnitFuncs {
 
     })
     retList.toIterator
+  }
+
+  def megeDayInfo(record:((String,(Int,Int)))):(Int,Long,Int,Int)={
+    val arr=record._1.split(Common.CTRL_A)
+       val sceneId= arr(0).toInt
+       val date= arr(1).toLong
+      (sceneId,date,record._2._1,record._2._2/record._2._1)
   }
 
 }

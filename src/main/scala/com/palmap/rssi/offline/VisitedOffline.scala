@@ -51,10 +51,10 @@ object VisitedOffline {
           .append(Common.MONGO_SHOP_VISITED_TIMES, times)
           .append(Common.MONGO_SHOP_VISITED_ISCUSTOMER, isCustomer)
           .append(Common.MONGO_SHOP_VISITED_PHONEBRAND, phoneBrand)
+          .append(Common.MONGO_SHOP_VISITED_DWELL, timeList.size)
 
         val updateCol = new BasicDBObject()
           .append(Common.MONGO_OPTION_SET, updateBasic)
-          .append(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_SHOP_VISITED_DWELL, timeList.size))
 
         visitorCollection.update(queryVisit, updateCol, true)
       })

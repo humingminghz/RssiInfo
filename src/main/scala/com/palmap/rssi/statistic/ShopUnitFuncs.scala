@@ -90,30 +90,32 @@ object ShopUnitFuncs {
       val sceneId = info(0).toInt
       val minuteTime = info(2).toLong
       val mac=info(1)
-
-       if (CommonConf.sceneIdlist.contains(sceneId)) {
-        var isFlag = false
-        if (CommonConf.businessHoursMap.contains(sceneId)) {
-          val todayDateFormat = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
-          val date = todayDateFormat.parse(todayDateFormat.format(minuteTime)).getTime
-
-          val openMinute = date + CommonConf.businessHoursMap(sceneId)._1 * Common.MINUTE_FORMATER
-          val closeMinute = date + CommonConf.businessHoursMap(sceneId)._2 * Common.MINUTE_FORMATER
-          isFlag = minuteTime >= openMinute && minuteTime <= closeMinute
-
-        } else {
-          isFlag = true
-        }
-         if(CommonConf.machineSet.contains(mac.toLowerCase())){
-           isFlag = false
-         }
-
-         if (isFlag) {
-          recordList += record
-        }
-
-      }
-    })
+      recordList += record
+//
+//       if (CommonConf.sceneIdlist.contains(sceneId)) {
+//        var isFlag = false
+//        if (CommonConf.businessHoursMap.contains(sceneId)) {
+//          val todayDateFormat = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
+//          val date = todayDateFormat.parse(todayDateFormat.format(minuteTime)).getTime
+//
+//          val openMinute = date + CommonConf.businessHoursMap(sceneId)._1 * Common.MINUTE_FORMATER
+//          val closeMinute = date + CommonConf.businessHoursMap(sceneId)._2 * Common.MINUTE_FORMATER
+//          isFlag = minuteTime >= openMinute && minuteTime <= closeMinute
+//
+//        } else {
+//          isFlag = true
+//        }
+//         if(CommonConf.machineSet.contains(mac.toLowerCase())){
+//           isFlag = false
+//
+//         }
+//
+//         if (isFlag) {
+//          recordList += record
+//        }
+//
+//      }
+     })
 
     recordList.toIterator
   }
