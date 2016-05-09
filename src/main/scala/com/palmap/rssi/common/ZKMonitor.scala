@@ -38,6 +38,7 @@ object ZKMonitor {
               val sceneId =  info(1).toInt
               ConfInfoSet.updateBusinessHourMap(sceneId)
             }
+            case  Common.ZK_MACHINE_SET => ConfInfoSet.updateMachineSet() //update machine set
             case _ => println(info(0))
           }
         } catch {

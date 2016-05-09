@@ -9,6 +9,7 @@ import com.palmap.rssi.common.{CommonConf, Common, GeneralMethods, MongoFactory}
 import com.palmap.rssi.message.FrostEvent.{IdType, RssiInfo, StubType}
 import com.palmap.rssi.message.ShopStore.Visitor
 import scala.collection.JavaConversions._
+import scala.collection.mutable
 import scala.collection.mutable.{ListBuffer, ArrayBuffer}
 
 object ShopUnitFuncs {
@@ -88,27 +89,33 @@ object ShopUnitFuncs {
       val info = record._1.split(Common.CTRL_A, -1)
       val sceneId = info(0).toInt
       val minuteTime = info(2).toLong
-
-      if (CommonConf.sceneIdlist.contains(sceneId)) {
-        var isFlag = false
-        if (CommonConf.businessHoursMap.contains(sceneId)) {
-          val todayDateFormat = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
-          val date = todayDateFormat.parse(todayDateFormat.format(minuteTime)).getTime
-
-          val openMinute = date + CommonConf.businessHoursMap(sceneId)._1 * Common.MINUTE_FORMATER
-          val closeMinute = date + CommonConf.businessHoursMap(sceneId)._2 * Common.MINUTE_FORMATER
-          isFlag = minuteTime >= openMinute && minuteTime <= closeMinute
-
-        } else {
-          isFlag = true
-        }
-
-        if (isFlag) {
-          recordList += record
-        }
-
-      }
-    })
+      val mac=info(1)
+      recordList += record
+//
+//       if (CommonConf.sceneIdlist.contains(sceneId)) {
+//        var isFlag = false
+//        if (CommonConf.businessHoursMap.contains(sceneId)) {
+//          val todayDateFormat = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
+//          val date = todayDateFormat.parse(todayDateFormat.format(minuteTime)).getTime
+//
+//          val openMinute = date + CommonConf.businessHoursMap(sceneId)._1 * Common.MINUTE_FORMATER
+//          val closeMinute = date + CommonConf.businessHoursMap(sceneId)._2 * Common.MINUTE_FORMATER
+//          isFlag = minuteTime >= openMinute && minuteTime <= closeMinute
+//
+//        } else {
+//          isFlag = true
+//        }
+//         if(CommonConf.machineSet.contains(mac.toLowerCase())){
+//           isFlag = false
+//
+//         }
+//
+//         if (isFlag) {
+//          recordList += record
+//        }
+//
+//      }
+     })
 
     recordList.toIterator
   }
@@ -121,9 +128,9 @@ object ShopUnitFuncs {
       val sceneId = keyInfo(0).toInt
       val phoneMac = keyInfo(1)
       val minuteTime = keyInfo(2).toLong
-      println( phoneMac + " ----------------- " + event._2)
+     // println( phoneMac + " ----------------- " + event._2)
       val rssiList = event._2.sorted
-      println("sorted ele: " + rssiList(rssiList.length - 1))
+     // println("sorted ele: " + rssiList(rssiList.length - 1))
 
       val phoneMacKey = phoneMac.substring(0, Common.MAC_KEY_LENGTH)
       var phoneBrand = Common.BRAND_UNKNOWN
@@ -241,6 +248,18 @@ object ShopUnitFuncs {
       shopRddMap.append((record._1, visitor.build().toByteArray()))
     })
     shopRddMap.toIterator
+  }
+
+
+  def checkMachine(partition: Iterator[(String,Boolean, Array[Byte])]): Iterator[String]  ={
+    val ret = mutable.Set[String]()
+    partition.foreach(record => {
+
+      val keyInfo = record._1.split(Common.CTRL_A, -1)
+      println(keyInfo(1))
+      ret.add(keyInfo(1))
+    })
+    ret.iterator
   }
 
 }

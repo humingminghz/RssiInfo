@@ -4,6 +4,10 @@
 package com.palmap.rssi.common;
 
 public class Common {
+	public static final String MACHINE_SET_FILE = "machine_list";
+	public static final String ZK_MACHINE_SET = "machineSet";
+	public static final String MACHINE_SET_PATH = "/com/palmaplus/rssi/conf/machine_new";
+
 	public static final String BRAND_UNKNOWN    = "unknown";
 	public static final String SHOP_SCENEIDS_URL="sceneIdsUrl";
 
@@ -17,9 +21,13 @@ public class Common {
 	public static final String MACHINEBRAND_SET_FILE = "machineBrand_list";
 	public static final char BATCH_INTERVAL_IN_MILLI_SEC = 60000;
 	public static final int MINUTE_FORMATER  = 60000;
+	public static final int DEFAULT_MACHINE_CHECK_MINUTE = 2* 5;
 	public static final String NOW_MINUTE_FORMAT = "yyyy-MM-dd HH:mm:00";
 	public static final String NOW_HOUR_FORMAT = "yyyy-MM-dd HH:00:00";
 	public static final String TODAY_FIRST_TS_FORMAT = "yyyy-MM-dd 00:00:00";
+	public static final int HOUR_FORMATER = MINUTE_FORMATER * 60;
+	public static final int DAY_FORMATER  = MINUTE_FORMATER * 60 * 24;
+	public static final int DEFAULT_MACHINE_CHECK_TIMES = 1;
 
 	public static final String ZK_MAP_MONITOR_PATH="zk.map.monitor.path";
 	public static final String ZOOKEEPER_QUORUM="zkQuorum";
@@ -54,12 +62,19 @@ public class Common {
 	public static final String MONGO_OPTION_ALL  = "$all";
 	public static final String MONGO_OPTION_SIZE  = "$size";
 	public static final String MONGO_OPTION_ADDTOSET  = "$addToSet";
+	public static final String MONGO_OPTION_IN = "$in";
 
 	public static final String MONGO_COLLECTION_SHOP_HISTORY = "shop_history";
 	public static final String MONGO_HISTORY_SHOP_SCENEID = "sceneId";
 	public static final String MONGO_HISTORY_SHOP_MAC = "mac";
 	public static final String MONGO_HISTORY_SHOP_TIMES = "times";
 	public static final String MONGO_HISTORY_SHOP_DAYS = "days";
+
+	public static final String MONGO_COLLECTION_SHOP_DAY_INFO = "shop_day_info";
+	public static final String MONGO_HISTORY_SHOP_DAY_INFO_SCENEID = "sceneId";
+	public static final String MONGO_HISTORY_SHOP_DAY_INFO_DATE = "date";
+	public static final String MONGO_HISTORY_SHOP_DAY_INFO_COUNT = "count";
+	public static final String MONGO_HISTORY_SHOP_DAY_INFO_DWELL = "dwell";
 
 	public static final String MONGO_COLLECTION_SHOP_VISITED = "shop_visited";
 	public static final String MONGO_SHOP_VISITED_DATE = "date";

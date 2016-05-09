@@ -36,6 +36,7 @@ object VisitedFuncs {
         .append(Common.MONGO_HISTORY_SHOP_TIMES, 1)
 
       var times = 0
+
       val reList = historyCollection.find(queryBasic, findBasic).toList
       if (reList.size > 0) {
         times = reList.head.get(Common.MONGO_HISTORY_SHOP_TIMES).toString.toInt
@@ -53,8 +54,10 @@ object VisitedFuncs {
 
       val reDwell = visitorCollection.find(queryVisit, findDwell).toList
       var isCustomer = false
+      var dwell=0
       if (reDwell.size > 0 && reDwell.head.containsField(Common.MONGO_SHOP_VISITED_DWELL)) {
-        isCustomer = reDwell.head.get(Common.MONGO_SHOP_VISITED_DWELL).toString.toInt > Common.CUSTOMER_JUDGE
+        dwell = reDwell.head.get(Common.MONGO_SHOP_VISITED_DWELL).toString.toInt
+        isCustomer = dwell > Common.CUSTOMER_JUDGE
       }
 
       val updateBasic = new BasicDBObject()
@@ -69,7 +72,7 @@ object VisitedFuncs {
       visitorCollection.update(queryVisit, updateCol, true)
 
       visitorBuilder.setIsCustomer(isCustomer)
-      retList += ((item._1, visitorBuilder.build().toByteArray))
+      retList += ((item._1,visitorBuilder.build().toByteArray))
     })
 
     retList.toIterator
