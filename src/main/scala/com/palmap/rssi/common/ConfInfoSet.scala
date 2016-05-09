@@ -102,4 +102,11 @@ object ConfInfoSet {
     outSteam.close
     return new String(outSteam.toByteArray, "utf-8")
   }
+
+  def getMachineBrandList(fileName: String): Unit = {
+    Source.fromFile(fileName).getLines().foreach(line => {
+      val macBrand = line.trim
+      CommonConf.machineBrandSet.add(macBrand)
+    })
+  }
 }

@@ -39,12 +39,12 @@ object ShopSceneLauncher {
     val kafkaParams = Map[String, String](Common.KAFKA_METADATA_BROKER -> broker_list, Common.SPARK_GROUP_ID -> group_id)
     val messagesRdd = KafkaUtils.createDirectStream[String, Array[Byte], StringDecoder, DefaultDecoder](ssc, kafkaParams, Set(topics))
     messagesRdd.count().map(x => "Received " + x + " kafka events.").print()
-    KafkaUtils.createStream()
     val visitorRdd = messagesRdd.map(_._2)
       .flatMap(ShopUnitFuncs.visitorInfo1)
       .mapPartitions(ShopUnitFuncs.filterBusinessVisitor)
       .reduceByKey((record, nextRecord) => record ++ nextRecord)
       .mapPartitions(ShopUnitFuncs.buildVisitor1)
+      .filter(ShopUnitFuncs.machineMacFilter)
       .cache()
 
 //    //.repartition(System.getProperty("spark.default.parallelism").toInt)

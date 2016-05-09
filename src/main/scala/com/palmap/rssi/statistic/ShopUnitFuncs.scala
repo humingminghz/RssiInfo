@@ -145,6 +145,11 @@ object ShopUnitFuncs {
     reList.toIterator
   }
 
+  def machineMacFilter(record: (String, Array[Byte])): Boolean = {
+    if (record._2.isEmpty) return false
+    val mac = record._1.split(Common.CTRL_A, -1)(1)
+    CommonConf.machineBrandSet.contains(mac.substring(0, 8))
+  }
 
   def visitorInfo(event: Array[Byte]): Map[String, Int] = {
     val frostEvent = RssiInfo.newBuilder()

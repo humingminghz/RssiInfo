@@ -35,49 +35,49 @@ object RealTimeFuncs {
   }
 
   def saveRealTime(rdd: RDD[(String, scala.collection.mutable.Set[String])]): Unit = {
-    try {
       rdd.foreachPartition(partition => {
-        val realTimeCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_REALTIME)
-        val realTimeHourCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_REALTIMEHOUR)
+        try {
+          val realTimeCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_REALTIME)
+          val realTimeHourCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_REALTIMEHOUR)
 
-        partition.foreach(record => {
-          val ele = record._1.split(Common.CTRL_A, -1)
-          val sceneId = ele(0).toInt
-          val isCustomer = ele(1).toBoolean
-          val minuteTime = ele(2).toLong
-          val macs = record._2
+          partition.foreach(record => {
+            val ele = record._1.split(Common.CTRL_A, -1)
+            val sceneId = ele(0).toInt
+            val isCustomer = ele(1).toBoolean
+            val minuteTime = ele(2).toLong
+            val macs = record._2
 
-          val queryBasic = new BasicDBObject()
-            .append(Common.MONGO_SHOP_REALTIME_TIME, minuteTime)
-            .append(Common.MONGO_SHOP_REALTIME_SCENEID, sceneId)
-            .append(Common.MONGO_SHOP_REALTIME_ISCUSTOMER, isCustomer)
+            val queryBasic = new BasicDBObject()
+              .append(Common.MONGO_SHOP_REALTIME_TIME, minuteTime)
+              .append(Common.MONGO_SHOP_REALTIME_SCENEID, sceneId)
+              .append(Common.MONGO_SHOP_REALTIME_ISCUSTOMER, isCustomer)
 
-          val updateBasic = new BasicDBObject()
-            .append(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_SHOP_REALTIME_MACSUM, macs.size))
-            .append(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_SHOP_REALTIME_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macs)))
+            val updateBasic = new BasicDBObject()
+              .append(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_SHOP_REALTIME_MACSUM, macs.size))
+              .append(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_SHOP_REALTIME_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macs)))
 
-          realTimeCollection.update(queryBasic, updateBasic, true)
+            realTimeCollection.update(queryBasic, updateBasic, true)
 
-          val sdf = new SimpleDateFormat(Common.NOW_HOUR_FORMAT)
-          val hour = sdf.parse(sdf.format(new Date(minuteTime))).getTime
+            val sdf = new SimpleDateFormat(Common.NOW_HOUR_FORMAT)
+            val hour = sdf.parse(sdf.format(new Date(minuteTime))).getTime
 
-          val queryHourBasic = new BasicDBObject()
-            .append(Common.MONGO_SHOP_REALTIME_HOUR, hour)
-            .append(Common.MONGO_SHOP_REALTIMEHOUR_SCENEID, sceneId)
-            .append(Common.MONGO_SHOP_REALTIME_HOUR_ISCUSTOMER, isCustomer)
+            val queryHourBasic = new BasicDBObject()
+              .append(Common.MONGO_SHOP_REALTIME_HOUR, hour)
+              .append(Common.MONGO_SHOP_REALTIMEHOUR_SCENEID, sceneId)
+              .append(Common.MONGO_SHOP_REALTIME_HOUR_ISCUSTOMER, isCustomer)
 
-          val updateMacBasic = new BasicDBObject()
-            .append(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_SHOP_REALTIMEHOUR_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macs)))
+            val updateMacBasic = new BasicDBObject()
+              .append(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_SHOP_REALTIMEHOUR_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macs)))
 
-          realTimeHourCollection.update(queryHourBasic, updateMacBasic, true)
+            realTimeHourCollection.update(queryHourBasic, updateMacBasic, true)
 
-        })
+          })
+        }
+        catch {
+          case e: Exception => e.printStackTrace()
+        }
+
       })
-    }
-    catch {
-      case e: Exception => e.printStackTrace()
-    }
-
   }
 
 
@@ -97,47 +97,47 @@ object RealTimeFuncs {
 //  }
 
 
-//  def saveRealtimeRdd(rdd: RDD[(String, scala.collection.mutable.Set[String])]): Unit = {
-//    rdd.foreachPartition { partition => {
-//      try {
-//        val realTimeCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_REALTIME)
-//        val realTimeHourCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_REALTIMEHOUR)
-//        partition.foreach(record => {
-//
-//          val arrs = record._1.split(Common.CTRL_A, -1)
-//          val sceneId = arrs(0).toInt
-//          val isCustomer = arrs(1).toBoolean
-//          val minTime=arrs(2).toLong
-//          val macList = record._2
-//
-//          val hourFormat = new SimpleDateFormat(Common.NOW_HOUR_FORMAT)
-//          val hour = hourFormat.parse(hourFormat.format(minTime)).getTime
-//
-//          val query = new BasicDBObject(Common.MONGO_SHOP_REALTIME_TIME, minTime)
-//          query.append(Common.MONGO_SHOP_REALTIME_SCENEID, sceneId)
-//          query.append(Common.MONGO_SHOP_REALTIME_ISCUSTOMER, isCustomer)
-//
-//          val update = new BasicDBObject()
-//          update.append(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_SHOP_REALTIME_MACSUM, macList.size))
-//          update.append(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_SHOP_REALTIME_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
-//
-//          realTimeCollection.update(query, update, true)
-//
-//          val hourQuery = new BasicDBObject(Common.MONGO_SHOP_REALTIME_HOUR, hour)
-//          hourQuery.append(Common.MONGO_SHOP_REALTIMEHOUR_SCENEID, sceneId)
-//          hourQuery.append(Common.MONGO_SHOP_REALTIME_HOUR_ISCUSTOMER, isCustomer)
-//
-//          val hourUpdate = new BasicDBObject
-//          hourUpdate.append(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_SHOP_REALTIMEHOUR_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
-//
-//          realTimeHourCollection.update(hourQuery, hourUpdate, true)
-//
-//        })
-//      } catch {
-//        case e: Exception => e.printStackTrace()
-//      }
-//    }
-//
-//    }
-//  }
+  def saveRealtimeRdd(rdd: RDD[(String, scala.collection.mutable.Set[String])]): Unit = {
+    rdd.foreachPartition { partition => {
+      try {
+        val realTimeCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_REALTIME)
+        val realTimeHourCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_REALTIMEHOUR)
+        partition.foreach(record => {
+
+          val arrs = record._1.split(Common.CTRL_A, -1)
+          val sceneId = arrs(0).toInt
+          val isCustomer = arrs(1).toBoolean
+          val minTime=arrs(2).toLong
+          val macList = record._2
+
+          val hourFormat = new SimpleDateFormat(Common.NOW_HOUR_FORMAT)
+          val hour = hourFormat.parse(hourFormat.format(minTime)).getTime
+
+          val query = new BasicDBObject(Common.MONGO_SHOP_REALTIME_TIME, minTime)
+          query.append(Common.MONGO_SHOP_REALTIME_SCENEID, sceneId)
+          query.append(Common.MONGO_SHOP_REALTIME_ISCUSTOMER, isCustomer)
+
+          val update = new BasicDBObject()
+          update.append(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_SHOP_REALTIME_MACSUM, macList.size))
+          update.append(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_SHOP_REALTIME_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
+
+          realTimeCollection.update(query, update, true)
+
+          val hourQuery = new BasicDBObject(Common.MONGO_SHOP_REALTIME_HOUR, hour)
+          hourQuery.append(Common.MONGO_SHOP_REALTIMEHOUR_SCENEID, sceneId)
+          hourQuery.append(Common.MONGO_SHOP_REALTIME_HOUR_ISCUSTOMER, isCustomer)
+
+          val hourUpdate = new BasicDBObject
+          hourUpdate.append(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_SHOP_REALTIMEHOUR_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
+
+          realTimeHourCollection.update(hourQuery, hourUpdate, true)
+
+        })
+      } catch {
+        case e: Exception => e.printStackTrace()
+      }
+    }
+
+    }
+  }
 }

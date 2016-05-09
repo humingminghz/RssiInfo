@@ -14,6 +14,7 @@ public class Common {
 	public static final String CTRL_B  = "\u0002";
 	public static final String CTRL_C  = "\u0003";
 
+	public static final String MACHINEBRAND_SET_FILE = "machineBrand_list";
 	public static final char BATCH_INTERVAL_IN_MILLI_SEC = 60000;
 	public static final int MINUTE_FORMATER  = 60000;
 	public static final String NOW_MINUTE_FORMAT = "yyyy-MM-dd HH:mm:00";
