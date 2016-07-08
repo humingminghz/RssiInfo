@@ -27,8 +27,6 @@ object ShopSceneLauncher {
     System.setProperty("spark.storage.memoryFraction", "0.4")
     System.setProperty("spark.shuffle.io.preferDirectBufs", "false")
 
-    val machineFilePath = args(0)
-
     val sparkConf = new SparkConf().setAppName("frost-launcher")
     sparkConf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
    // sparkConf.set("spark.kryoserializer.buffer.mb","5")
@@ -43,26 +41,12 @@ object ShopSceneLauncher {
     messagesRdd.count().map(x => "Received " + x + " kafka events.").print()
 
     val visitorRdd = messagesRdd.map(_._2)
-      .flatMap(ShopUnitFuncs.visitorInfo1)
+      .flatMap(ShopUnitFuncs.visitorInfo)
       .mapPartitions(ShopUnitFuncs.filterBusinessVisitor)
       .reduceByKey((record, nextRecord) => record ++ nextRecord)
-      .mapPartitions(ShopUnitFuncs.buildVisitor1)
+      .mapPartitions(ShopUnitFuncs.buildVisitor)
       .filter(ShopUnitFuncs.machineMacFilter)
       .cache()
-
-//    //.repartition(System.getProperty("spark.default.parallelism").toInt)
-//    val visitorRdd = messagesRdd.map(x => x._2)
-//    .flatMap(ShopUnitFuncs.visitorInfo _)
-//    .filter(ShopUnitFuncs.filterFuncs _)
-//    .reduceByKey(max)
-//    .mapPartitions(ShopUnitFuncs.buildVisitor _)
-//    .reduceB yKey((bytesCurVisitor, bytesNextVisitor) => {
-//      val curVisitor = Visitor.newBuilder().clear().mergeFrom(bytesCurVisitor, 0, bytesCurVisitor.length)
-//      curVisitor.mergeFrom(bytesNextVisitor, 0, bytesNextVisitor.length)
-//      curVisitor.build().toByteArray()
-//    })
-//      //.filter(record => ShopUnitFuncs.visitorFilter(record._2))
-//     .cache()
 
     //history
     visitorRdd.foreachRDD(HistoryFuncs.saveHistory _)
@@ -77,8 +61,6 @@ object ShopSceneLauncher {
 
     realTimeRdd.foreachRDD(RealTimeFuncs.saveRealTime _)
     realTimeRdd.count().map("process " +_ + " data; save data to realTime. " + new Date()).print
-
-
 
     ssc.start()
     ssc.awaitTermination()

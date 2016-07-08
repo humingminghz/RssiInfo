@@ -26,7 +26,7 @@ object ConfInfoSet {
     Source.fromFile(fileName).getLines()
       .foreach { line =>
         val mac = line.trim()
-        CommonConf.machineSet.add(mac)
+        CommonConf.machineSet.add(mac.toUpperCase)
       }
   }
 
@@ -37,7 +37,7 @@ object ConfInfoSet {
     val in = fileSystem.open(new Path(Common.MACHINE_SET_PATH))
     val bufferedReader = new BufferedReader(new InputStreamReader(in))
     var line = ""
-    while ({ line=bufferedReader.readLine(); line != null }) {
+    while ({ line = bufferedReader.readLine(); line != null }) {
       CommonConf.machineSet.add(line.trim)
     }
     println("after updata machine set:"+  CommonConf.machineSet.size)
@@ -56,6 +56,7 @@ object ConfInfoSet {
         CommonConf.sceneIdlist += jsonList.getInt(i)
         print("   " + jsonList.getInt(i))
       }
+      print("sceneIdList: " + CommonConf.sceneIdlist)
     }catch{
       case e: Exception => println(url+"get wrong"+e.toString)
     }
@@ -132,7 +133,7 @@ object ConfInfoSet {
   def getMachineBrandList(fileName: String): Unit = {
     Source.fromFile(fileName).getLines().foreach(line => {
       val macBrand = line.trim
-      CommonConf.machineBrandSet.add(macBrand)
+      CommonConf.machineBrandSet.add(macBrand.toUpperCase)
     })
   }
 }

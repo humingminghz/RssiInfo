@@ -19,6 +19,8 @@ object VisitedFuncs {
     val retList = ListBuffer[(String, Array[Byte])]()
     val visitorCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_VISITED)
     val historyCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_HISTORY)
+    val realTimeCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_REALTIME)
+    val shopTypeInfoCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_TYPE_INFO)
 
     iter.foreach(item => {
       val visitorBuilder = Visitor.newBuilder().mergeFrom(item._2, 0, item._2.length)
@@ -35,15 +37,53 @@ object VisitedFuncs {
         .append(Common.MONGO_OPTION_ID, 0)
         .append(Common.MONGO_HISTORY_SHOP_TIMES, 1)
 
-      var times = 0
-
+      //历史查询， 获取到访次数
       val reList = historyCollection.find(queryBasic, findBasic).toList
+      var times = 0
       if (reList.size > 0) {
         times = reList.head.get(Common.MONGO_HISTORY_SHOP_TIMES).toString.toInt
       }
 
       val sdf = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
       val dayTime = sdf.parse(sdf.format(new Date(timeStamp))).getTime
+
+      val realQuery = new BasicDBObject()
+        .append(Common.MONGO_SHOP_REALTIME_SCENEID, sceneId)
+        .append(Common.MONGO_SHOP_REALTIME_MACS, mac)
+        .append(Common.MONGO_SHOP_REALTIME_TIME, new BasicDBObject(Common.MONGO_OPTION_GTE, timeStamp - Common.HOUR_FORMATER))
+
+      val realfind = new BasicDBObject()
+        .append(Common.MONGO_OPTION_ID, 0)
+        .append(Common.MONGO_SHOP_REALTIME_TIME, 1)
+
+      //查询前一次的时间
+      val minuteList = realTimeCollection.find(realQuery, realfind).sort(new BasicDBObject(Common.MONGO_SHOP_REALTIME_TIME, -1)).limit(1).toList
+      var minuteAgo = 0L
+      if (minuteList.size > 0) {
+        minuteAgo = minuteList.head.get(Common.MONGO_SHOP_REALTIME_TIME).toString.toLong
+      }
+
+      //间隔时间(分钟)
+      val intervalTime = ((timeStamp - minuteAgo) / Common.MINUTE_FORMATER).toInt
+      var dwell = 1
+      //判定小于等于10分钟的，dwell进行累计； 否则，判定为2次进店或路过，dwell为1
+      if (intervalTime <= Common.INTERVATE_MINUTE) {
+        dwell = intervalTime;
+      }
+
+//      println("sceneId: " + sceneId+ "    currentTime: " + timeStamp + "    minuteAgo: " + minuteAgo +"      dwell: " + dwell)
+
+      val queryTypeInfo = new BasicDBObject(Common.MONGO_COLLECTION_SHOP_SCENEIDS, sceneId)
+      val colTypeInfo = new BasicDBObject(Common.MONGO_OPTION_ID, 0).append(Common.MONGO_COLLECTION_SHOP_CUSTOMERDWELL, 1)
+
+      //查询顾客判定条件
+      val dwellList = shopTypeInfoCollection.find(queryTypeInfo, colTypeInfo).toList
+      var customerFlag = 0
+      if (dwellList.size > 0) {
+        customerFlag = dwellList.head.get(Common.MONGO_COLLECTION_SHOP_CUSTOMERDWELL).toString.toInt
+      }
+
+//      println("customerFlag: " + customerFlag)
 
       val queryVisit = new BasicDBObject()
         .append(Common.MONGO_SHOP_VISITED_DATE, dayTime)
@@ -54,10 +94,9 @@ object VisitedFuncs {
 
       val reDwell = visitorCollection.find(queryVisit, findDwell).toList
       var isCustomer = false
-      var dwell=0
       if (reDwell.size > 0 && reDwell.head.containsField(Common.MONGO_SHOP_VISITED_DWELL)) {
-        dwell = reDwell.head.get(Common.MONGO_SHOP_VISITED_DWELL).toString.toInt
-        isCustomer = dwell > Common.CUSTOMER_JUDGE
+        val dwellAgo = reDwell.head.get(Common.MONGO_SHOP_VISITED_DWELL).toString.toInt
+        isCustomer = dwellAgo + dwell > customerFlag
       }
 
       val updateBasic = new BasicDBObject()
@@ -67,7 +106,7 @@ object VisitedFuncs {
 
       val updateCol = new BasicDBObject()
         .append(Common.MONGO_OPTION_SET, updateBasic)
-        .append(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_SHOP_VISITED_DWELL, 1))
+        .append(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_SHOP_VISITED_DWELL, dwell))
 
       visitorCollection.update(queryVisit, updateCol, true)
 

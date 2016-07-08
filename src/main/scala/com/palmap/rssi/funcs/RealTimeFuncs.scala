@@ -71,6 +71,7 @@ object RealTimeFuncs {
 
             realTimeHourCollection.update(queryHourBasic, updateMacBasic, true)
 
+
           })
         }
         catch {

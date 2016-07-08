@@ -23,7 +23,6 @@ object HistoryFuncs {
           val sceneId = visitorBuilder.getSceneId
           val mac = new String(visitorBuilder.getPhoneMac.toByteArray())
           val minuteTime = visitorBuilder.getTimeStamp
-         // println("HistoryFuncs mac: " + mac)
           val sdf = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
           val dayTime = sdf.parse(sdf.format(new Date(minuteTime))).getTime
 
