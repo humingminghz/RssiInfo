@@ -1,5 +1,4 @@
 package com.palmap.rssi.statistic
-
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -47,12 +46,11 @@ object ShopSceneLauncher {
       .mapPartitions(ShopUnitFuncs.buildVisitor)
       .filter(ShopUnitFuncs.machineMacFilter)
       .cache()
-
     //history
     visitorRdd.foreachRDD(HistoryFuncs.saveHistory _)
     visitorRdd.count().map("process " + _ + " data; save data to History. " + new Date()).print
 
-    val visitorDwellRDD= visitorRdd.mapPartitions(VisitedFuncs.calVisitorDwell _).cache()
+    val visitorDwellRDD = visitorRdd.mapPartitions(VisitedFuncs.calVisitorDwell _).cache()
     //Visited  calcDwellIsCustomer
     val realTimeRdd = visitorDwellRDD.mapPartitions(RealTimeFuncs.calRealTime _)
       .reduceByKey((record, nextRecord) => record ++ nextRecord)

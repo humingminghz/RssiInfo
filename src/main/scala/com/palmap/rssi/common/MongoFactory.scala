@@ -49,7 +49,7 @@ object MongoFactory {
       //no authenticate
       else mongo = MongoClient(serverList.toList, options)
     } catch {
-      case e: Exception => e.printStackTrace()
+      case e: Exception => println("ERROR mongo:  " + e.printStackTrace())
     }
   }
 

@@ -66,11 +66,14 @@ public class Common {
     public static final String MONGO_OPTION_SIZE = "$size";
     public static final String MONGO_OPTION_ADDTOSET = "$addToSet";
     public static final String MONGO_OPTION_IN = "$in";
+    public static final String MONGO_OPTION_EXISTS    = "$exists";
 
     public static final String MONGO_COLLECTION_SHOP_HISTORY = "shop_history";
     public static final String MONGO_HISTORY_SHOP_SCENEID = "sceneId";
     public static final String MONGO_HISTORY_SHOP_MAC = "mac";
     public static final String MONGO_HISTORY_SHOP_TIMES = "times";
+    public static final String MONGO_HISTORY_SHOP_FIRSTDATE = "firstDate";
+    public static final String MONGO_HISTORY_SHOP_LASTDATE = "lastDate";
     public static final String MONGO_HISTORY_SHOP_DAYS = "days";
 
     public static final String MONGO_COLLECTION_SHOP_DAY_INFO = "shop_day_info";
@@ -85,6 +88,7 @@ public class Common {
     public static final String MONGO_SHOP_VISITED_MAC = "mac";
     public static final String MONGO_SHOP_VISITED_DWELL = "dwell";
     public static final String MONGO_SHOP_VISITED_TIMES = "times";
+    public static final String MONGO_SHOP_VISITED_FREQUENCY = "frequency";
     public static final String MONGO_SHOP_VISITED_ISCUSTOMER = "isCustomer";
     public static final String MONGO_SHOP_VISITED_PHONEBRAND = "brand";
 

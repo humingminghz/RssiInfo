@@ -18,18 +18,23 @@ object RealTimeFuncs {
 
   def calRealTime(partition: Iterator[(String, Array[Byte])]): Iterator[(String, scala.collection.mutable.Set[String])] = {
     val retList = ListBuffer[(String, scala.collection.mutable.Set[String])]()
-    partition.foreach(iter => {
-      val visitor = Visitor.newBuilder().mergeFrom(iter._2, 0, iter._2.length)
-      val sceneId = visitor.getSceneId
-      val isCustomer = visitor.getIsCustomer
-      val minuteTime = visitor.getTimeStamp
+    try {
+      partition.foreach(iter => {
+        val visitor = Visitor.newBuilder().mergeFrom(iter._2, 0, iter._2.length)
+        val sceneId = visitor.getSceneId
+        val isCustomer = visitor.getIsCustomer
+        val minuteTime = visitor.getTimeStamp
 
-      val macs = scala.collection.mutable.Set[String]()
-      macs += new String(visitor.getPhoneMac.toByteArray)
+        val macs = scala.collection.mutable.Set[String]()
+        macs += new String(visitor.getPhoneMac.toByteArray).toUpperCase
 
-      retList += ((sceneId + Common.CTRL_A + isCustomer + Common.CTRL_A + minuteTime, macs))
+        retList += ((sceneId + Common.CTRL_A + isCustomer + Common.CTRL_A + minuteTime, macs))
 
-    })
+      })
+    }
+    catch {
+      case e: Exception => println("ERROR  calRealTime: " + e.printStackTrace())
+    }
 
     retList.toIterator
   }
@@ -70,8 +75,6 @@ object RealTimeFuncs {
               .append(Common.MONGO_OPTION_ADDTOSET, new BasicDBObject(Common.MONGO_SHOP_REALTIMEHOUR_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macs)))
 
             realTimeHourCollection.update(queryHourBasic, updateMacBasic, true)
-
-
           })
         }
         catch {
@@ -80,23 +83,6 @@ object RealTimeFuncs {
 
       })
   }
-
-
-//  def calRealTime(partition: Iterator[(String, Array[Byte])]): Iterator[(String, scala.collection.mutable.Set[String])] = {
-//    val ret = scala.collection.mutable.ListBuffer[(String, scala.collection.mutable.Set[String])]()
-//    partition.foreach(record => {
-//      val visitor = Visitor.newBuilder().mergeFrom(record._2, 0, record._2.length)
-//      val macs = scala.collection.mutable.Set[String]()
-//      val isCustomer = visitor.getIsCustomer
-//      val time=visitor.getTimeStamp
-//      macs.add(new String(visitor.getPhoneMac.toByteArray))
-//
-//      ret.append((visitor.getSceneId + Common.CTRL_A + isCustomer+Common.CTRL_A +time, macs))
-//    })
-//
-//    ret.toIterator
-//  }
-
 
   def saveRealtimeRdd(rdd: RDD[(String, scala.collection.mutable.Set[String])]): Unit = {
     rdd.foreachPartition { partition => {
