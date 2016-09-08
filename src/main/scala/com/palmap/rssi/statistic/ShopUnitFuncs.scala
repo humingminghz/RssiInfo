@@ -94,7 +94,7 @@ object ShopUnitFuncs {
           val date = todayDateFormat.parse(todayDateFormat.format(minuteTime)).getTime
           val openMinute = date + CommonConf.businessHoursMap(sceneId)._1 * Common.MINUTE_FORMATER
           val closeMinute = (date + CommonConf.businessHoursMap(sceneId)._2 * Common.MINUTE_FORMATER) - 1
-          println("sceneId: " + sceneId +"   openMinute: "+ openMinute +"   closeMinute:"+closeMinute +"   minuteTime: "+ minuteTime)
+//          println("sceneId: " + sceneId +"   openMinute: "+ openMinute +"   closeMinute:"+closeMinute +"   minuteTime: "+ minuteTime)
           isFlag = minuteTime >= openMinute && minuteTime <= closeMinute
         } else {
           isFlag = true

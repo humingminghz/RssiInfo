@@ -12,10 +12,10 @@ object CommonConf {
   val machineSet = scala.collection.mutable.HashSet[String]()
   ConfInfoSet.getMachineSet(Common.MACHINE_SET_FILE)
   //init machine set
-  val sceneIdlist = scala.collection.mutable.Set[Int](11301)
+  val sceneIdlist = scala.collection.mutable.Set[Int](1012, 10895, 10062, 11301, 10509)
   val businessHoursMap = scala.collection.mutable.Map[Int ,(Int, Int)]()
   ConfInfoSet.getBusinessHoursMap //get static info
-  ConfInfoSet.getSceneIdlist
+//  ConfInfoSet.getSceneIdlist
 
   val macBrandMap = ShopSceneFuncs.getMacBrandMap(Common.MAC_BRAND)
 
