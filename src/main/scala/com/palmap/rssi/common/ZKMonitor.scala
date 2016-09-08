@@ -21,7 +21,7 @@ object ZKMonitor {
 
     val nodeMonitor = confNodeCache(client, zkMapMonitorPath)
     nodeMonitor.start(true)
-    println("start zk monitor....")
+    println(zkMapMonitorPath + " start zk monitor....")
 
   }
 

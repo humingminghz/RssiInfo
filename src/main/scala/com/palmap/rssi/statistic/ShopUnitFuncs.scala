@@ -93,15 +93,13 @@ object ShopUnitFuncs {
           val todayDateFormat = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
           val date = todayDateFormat.parse(todayDateFormat.format(minuteTime)).getTime
           val openMinute = date + CommonConf.businessHoursMap(sceneId)._1 * Common.MINUTE_FORMATER
-          val closeMinute = date + CommonConf.businessHoursMap(sceneId)._2 * Common.MINUTE_FORMATER
+          val closeMinute = (date + CommonConf.businessHoursMap(sceneId)._2 * Common.MINUTE_FORMATER) - 1
+          println("sceneId: " + sceneId +"   openMinute: "+ openMinute +"   closeMinute:"+closeMinute +"   minuteTime: "+ minuteTime)
           isFlag = minuteTime >= openMinute && minuteTime <= closeMinute
         } else {
           isFlag = true
-          println("filterBusinessVisitor: not hour : " + sceneId)
         }
-        println("filterBusinessVisitor :  mac: " + mac.toLowerCase)
         if(CommonConf.machineSet.contains(mac.toLowerCase())) {
-
           isFlag = false
         }
 
@@ -137,7 +135,6 @@ object ShopUnitFuncs {
         .addRssi(rssiList(rssiList.length - 1))
       reList += ((event._1, visitor.build().toByteArray))
     })
-//    println("buildVisitor..: " + reList.size)
     reList.toIterator
   }
 
