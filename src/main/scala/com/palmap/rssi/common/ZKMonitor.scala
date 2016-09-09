@@ -11,6 +11,7 @@ import org.apache.curator.utils.EnsurePath
 object ZKMonitor {
   val xmlConf = GeneralMethods.getConf(Common.SPARK_CONFIG)
   val zkMapMonitorPath = xmlConf(Common.ZK_MAP_MONITOR_PATH)
+  val sceneIdPath = xmlConf(Common.SCENEID_MONITOR_PATH)
   def startMonitor() = {
     val retryPolicy = new ExponentialBackoffRetry(1000,3)
     val client: CuratorFramework = CuratorFrameworkFactory.newClient(xmlConf(Common.ZOOKEEPER_QUORUM), retryPolicy)
@@ -20,9 +21,26 @@ object ZKMonitor {
     confEnsurePath.ensure(client.getZookeeperClient)
 
     val nodeMonitor = confNodeCache(client, zkMapMonitorPath)
+    val sceneIdMonitor = updateSceneIdNodeCache(client, sceneIdPath)
     nodeMonitor.start(true)
+    sceneIdMonitor.start(true)
     println(zkMapMonitorPath + " start zk monitor....")
 
+  }
+
+  def updateSceneIdNodeCache(client: CuratorFramework, path: String): NodeCache = {
+    val cache: NodeCache  = new NodeCache (client, path)
+    cache.getListenable.addListener(new NodeCacheListener {
+      override def nodeChanged(): Unit = {
+        val znodeData = new String(cache.getCurrentData.getData)
+        try{
+          CommonConf.sceneIdlist += znodeData.toInt
+        }catch {
+          case e: Exception => println("bad sceneId zkNode data: " + znodeData)
+        }
+      }
+    })
+    cache
   }
 
   def confNodeCache(client: CuratorFramework, path: String): NodeCache = {
