@@ -5,6 +5,7 @@ import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.retry.ExponentialBackoffRetry
 import org.apache.curator.utils.EnsurePath
 
+
 /**
  * Created by lingling.dai on 2015/12/15.
  */
@@ -12,6 +13,7 @@ object ZKMonitor {
   val xmlConf = GeneralMethods.getConf(Common.SPARK_CONFIG)
   val zkMapMonitorPath = xmlConf(Common.ZK_MAP_MONITOR_PATH)
   val sceneIdPath = xmlConf(Common.SCENEID_MONITOR_PATH)
+
   def startMonitor() = {
     val retryPolicy = new ExponentialBackoffRetry(1000,3)
     val client: CuratorFramework = CuratorFrameworkFactory.newClient(xmlConf(Common.ZOOKEEPER_QUORUM), retryPolicy)

@@ -21,7 +21,7 @@ object VisitedFuncs {
       val visitorCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_VISITED)
       val historyCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_HISTORY)
       val realTimeCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_REALTIME)
-      val shopTypeInfoCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_TYPE_INFO)
+//      val shopTypeInfoCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_TYPE_INFO)
 
       iter.foreach(item => {
         val visitorBuilder = Visitor.newBuilder().mergeFrom(item._2, 0, item._2.length)
@@ -29,6 +29,7 @@ object VisitedFuncs {
         val mac = new String(visitorBuilder.getPhoneMac.toByteArray).toUpperCase
         val timeStamp = visitorBuilder.getTimeStamp
         val phoneBrand = new String(visitorBuilder.getPhoneBrand.toByteArray)
+
 
         val queryBasic = new BasicDBObject()
           .append(Common.MONGO_HISTORY_SHOP_SCENEID, sceneId)
@@ -73,14 +74,14 @@ object VisitedFuncs {
         if (intervalTime <= Common.INTERVATE_MINUTE) {
           dwell = intervalTime;
         }
-        val queryTypeInfo = new BasicDBObject(Common.MONGO_COLLECTION_SHOP_SCENEIDS, sceneId)
-        val colTypeInfo = new BasicDBObject(Common.MONGO_OPTION_ID, 0).append(Common.MONGO_COLLECTION_SHOP_CUSTOMERDWELL, 1)
+//        val queryTypeInfo = new BasicDBObject(Common.MONGO_COLLECTION_SHOP_SCENEIDS, sceneId)
+//        val colTypeInfo = new BasicDBObject(Common.MONGO_OPTION_ID, 0).append(Common.MONGO_COLLECTION_SHOP_CUSTOMERDWELL, 1)
         //查询顾客判定条件
-        val dwellList = shopTypeInfoCollection.find(queryTypeInfo, colTypeInfo).toList
-        var customerFlag = 0
-        if (dwellList.size > 0) {
-          customerFlag = dwellList.head.get(Common.MONGO_COLLECTION_SHOP_CUSTOMERDWELL).toString.toInt
-        }
+//        val dwellList = shopTypeInfoCollection.find(queryTypeInfo, colTypeInfo).toList
+//        var customerFlag = 0
+//        if (dwellList.size > 0) {
+//          customerFlag = dwellList.head.get(Common.MONGO_COLLECTION_SHOP_CUSTOMERDWELL).toString.toInt
+//        }
 
         val queryVisit = new BasicDBObject()
           .append(Common.MONGO_SHOP_VISITED_DATE, dayTime)
@@ -94,8 +95,10 @@ object VisitedFuncs {
         if (reDwell.size > 0 && reDwell.head.containsField(Common.MONGO_SHOP_VISITED_DWELL)) {
           val dwellAgo = reDwell.head.get(Common.MONGO_SHOP_VISITED_DWELL).toString.toInt
           isCustomer = dwellAgo + dwell > 5
+          if(sceneId == 10062) {
+            isCustomer = !(phoneBrand.equals(Common.BRAND_UNKNOWN));
+          }
         }
-
         val updateBasic = new BasicDBObject()
           .append(Common.MONGO_SHOP_VISITED_TIMES, times)
           .append(Common.MONGO_SHOP_VISITED_FREQUENCY, freq)
@@ -115,7 +118,6 @@ object VisitedFuncs {
     catch {
       case e: Exception => println("ERROR calVisitorDwell: " + e.printStackTrace())
     }
-    println("calVisitorDwell: " + retList.size)
     retList.toIterator
 
   }

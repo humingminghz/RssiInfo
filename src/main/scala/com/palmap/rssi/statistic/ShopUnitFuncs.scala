@@ -42,8 +42,8 @@ object ShopUnitFuncs {
 //  }
 
 
-  def visitorInfo(visitor: Array[Byte]): mutable.HashMap[String, ArrayBuffer[Int]] = {
-    val visitorMap = mutable.HashMap[String, ArrayBuffer[Int]]()
+  def visitorInfo(visitor: Array[Byte]): mutable.HashMap[String, (ArrayBuffer[Int],ArrayBuffer[Int]) ]= {
+    val visitorMap = mutable.HashMap[String,(ArrayBuffer[Int],ArrayBuffer[Int])]()
     val visitorBuilder = RssiInfo.newBuilder().mergeFrom(visitor, 0, visitor.length)
     if (visitorBuilder.hasSceneId && visitorBuilder.hasTimestamp && visitorBuilder.hasIdData && visitorBuilder.getIdType == IdType.MAC && visitorBuilder.getStubType == StubType.AP) {
       val timeStamp = visitorBuilder.getTimestamp
@@ -57,16 +57,17 @@ object ShopUnitFuncs {
       if (minuteTime == (currentTime - Common.MINUTE_FORMATER)) {
         visitorBuilder.getItemsList.foreach(item => {
           if (item.hasIdData && item.hasRssi && item.getIdType == IdType.MAC) {
+            val appList = ArrayBuffer[Int](1)                   // to judeg how many aps contain mac
             val userMac = item.getIdData.toUpperCase()
             val rssi = item.getRssi
             val key = sceneId + Common.CTRL_A + userMac + Common.CTRL_A + minuteTime
             var rssiList = ArrayBuffer[Int]()
             if (visitorMap.contains(key)) {
-              rssiList = visitorMap(key)
+              rssiList = visitorMap(key)._1
             }
 
             rssiList += rssi
-            visitorMap += (sceneId  + Common.CTRL_A + userMac + Common.CTRL_A + minuteTime -> rssiList)
+            visitorMap += (sceneId  + Common.CTRL_A + userMac + Common.CTRL_A + minuteTime -> (rssiList,appList))
           }
         })
 
@@ -76,12 +77,14 @@ object ShopUnitFuncs {
     visitorMap
   }
 
+
+
   /**
    * 营业时间过滤
    * @return
    */
-  def filterBusinessVisitor(partition: Iterator[(String, ArrayBuffer[Int])]):Iterator[(String, ArrayBuffer[Int])] = {
-    val recordList = ListBuffer[(String, ArrayBuffer[Int])]()
+  def filterBusinessVisitor(partition: Iterator[(String, (ArrayBuffer[Int],ArrayBuffer[Int]))]):Iterator[(String, (ArrayBuffer[Int],ArrayBuffer[Int]))] = {
+    val recordList = ListBuffer[(String, ( ArrayBuffer[Int],ArrayBuffer[Int]))]()
     partition.foreach(record => {
       val info = record._1.split(Common.CTRL_A, -1)
       val sceneId = info(0).toInt
@@ -112,28 +115,43 @@ object ShopUnitFuncs {
     recordList.toIterator
   }
 
-  def buildVisitor(iter: Iterator[(String, ArrayBuffer[Int])]): Iterator[(String, Array[Byte])] = {
+  def buildVisitor(iter: Iterator[(String, (ArrayBuffer[Int],ArrayBuffer[Int]))]): Iterator[(String, Array[Byte])] = {
     val reList = ListBuffer[(String, Array[Byte])]()
     iter.foreach(event => {
-      val keyInfo = event._1.split(Common.CTRL_A, -1)
-      val sceneId = keyInfo(0).toInt
-      val phoneMac = keyInfo(1).toLowerCase
-      val minuteTime = keyInfo(2).toLong
-      val rssiList = event._2.sorted
-      val phoneMacKey = phoneMac.substring(0, Common.MAC_KEY_LENGTH)
-      var phoneBrand = Common.BRAND_UNKNOWN
-      if (macBrandMap.contains(phoneMacKey)) {
-        phoneBrand = macBrandMap(phoneMacKey)
-      }
+        val keyInfo = event._1.split(Common.CTRL_A, -1)
+        val sceneId = keyInfo(0).toInt
+        val phoneMac = keyInfo(1).toLowerCase
+        val minuteTime = keyInfo(2).toLong
+        val rssiList = event._2._1.sorted
 
-      val visitor = Visitor.newBuilder()
-        .setSceneId(sceneId)
-        .setPhoneMac(ByteString.copyFrom(phoneMac.getBytes()))
-        .setTimeStamp(minuteTime)
-        .setIsCustomer(false)
-        .setPhoneBrand(ByteString.copyFrom(phoneBrand.getBytes()))
-        .addRssi(rssiList(rssiList.length - 1))
-      reList += ((event._1, visitor.build().toByteArray))
+        val phoneMacKey = phoneMac.substring(0, Common.MAC_KEY_LENGTH)
+        var phoneBrand = Common.BRAND_UNKNOWN
+        if (macBrandMap.contains(phoneMacKey)) {
+          phoneBrand = macBrandMap(phoneMacKey)
+        }
+
+        if( (sceneId == 11340)){         // ap1 and ap2 contain mac
+          if(event._2._2.length == 2){
+          val visitor = Visitor.newBuilder()
+             .setSceneId(sceneId)
+             .setPhoneMac(ByteString.copyFrom(phoneMac.getBytes()))
+             .setTimeStamp(minuteTime)
+             .setIsCustomer(false)
+             .setPhoneBrand(ByteString.copyFrom(phoneBrand.getBytes()))
+             .addRssi(rssiList(rssiList.length - 1))
+          reList += ((event._1, visitor.build().toByteArray))
+          }
+      }
+      else{
+          val visitor = Visitor.newBuilder()
+            .setSceneId(sceneId)
+            .setPhoneMac(ByteString.copyFrom(phoneMac.getBytes()))
+            .setTimeStamp(minuteTime)
+            .setIsCustomer(false)
+            .setPhoneBrand(ByteString.copyFrom(phoneBrand.getBytes()))
+            .addRssi(rssiList(rssiList.length - 1))
+          reList += ((event._1, visitor.build().toByteArray))
+        }
     })
     reList.toIterator
   }

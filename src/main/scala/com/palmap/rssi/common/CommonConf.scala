@@ -3,6 +3,7 @@ package com.palmap.rssi.common
 import com.palmap.rssi.statistic.ShopSceneFuncs
 
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 /**
  * Created by lingling.dai on 2016/1/12.
@@ -21,6 +22,6 @@ object CommonConf {
 
   val machineBrandSet = mutable.HashSet[String]()
   ConfInfoSet.getMachineBrandList(Common.MACHINEBRAND_SET_FILE)
-
+  val apInfoMap = mutable.HashMap[Int,String]()
   ZKMonitor.startMonitor()
 }

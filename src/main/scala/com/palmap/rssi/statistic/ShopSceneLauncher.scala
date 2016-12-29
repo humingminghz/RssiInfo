@@ -12,7 +12,6 @@ import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.kafka.KafkaUtils
 import org.apache.spark.streaming.{Duration, Seconds, StreamingContext}
 
-import scala.math._
 
 /**
  * Created by admin on 2015/12/15.
@@ -33,16 +32,18 @@ object ShopSceneLauncher {
     sparkConf.set("spark.shuffle.consolidateFiles", "true")
 
     sparkConf.registerKryoClasses(Array(classOf[Visitor], classOf[Visitor.Builder]))
-    val ssc = new StreamingContext(sparkConf, Seconds(60))
+    val sc = new SparkContext(sparkConf)
+    val ssc = new StreamingContext(sc, Seconds(60))
     ssc.checkpoint("frost-checkpoint")
     val kafkaParams = Map[String, String](Common.KAFKA_METADATA_BROKER -> broker_list, Common.SPARK_GROUP_ID -> group_id)
     val messagesRdd = KafkaUtils.createDirectStream[String, Array[Byte], StringDecoder, DefaultDecoder](ssc, kafkaParams, Set(topics))
     messagesRdd.count().map(x => "Received " + x + " kafka events.").print()
 
     val visitorRdd = messagesRdd.map(_._2)
-      .flatMap(ShopUnitFuncs.visitorInfo)
+      .flatMap( ShopUnitFuncs.visitorInfo)
       .mapPartitions(ShopUnitFuncs.filterBusinessVisitor)
-      .reduceByKey((record, nextRecord) => record ++ nextRecord)
+      .reduceByKey((record, nextRecord) => {
+        (   record._1 ++ nextRecord._1,  record._2 ++ nextRecord._2)})
       .mapPartitions(ShopUnitFuncs.buildVisitor)
       .filter(ShopUnitFuncs.machineMacFilter)
       .cache()

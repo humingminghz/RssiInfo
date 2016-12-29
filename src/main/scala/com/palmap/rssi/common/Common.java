@@ -37,6 +37,7 @@ public class Common {
     public static final int EMPLOYEE_VALUE = 2;
     public static final int MACHINE_VALUE = 3;
     public static final String SCENEID_MONITOR_PATH = "sceneid.monitor.path";
+    public static final String RSSI_MONITOR_PATH = "rssi.monitor.path" ;
 
     public static final String SPARK_CONFIG = "sparkRssiInfo.xml";
     public static final String KAFKA_METADATA_BROKER = "metadata.broker.list";
