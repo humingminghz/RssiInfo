@@ -9,6 +9,12 @@ public class Common {
     public static final String MAC_BRAND = "mac_brand";
     public static final String MACHINEBRAND_SET_FILE = "machineBrand_list";
     public static final String MACHINE_SET_PATH = "/com/palmaplus/rssi/conf/machine_new";
+    //    public static final String SCENEID_SET_FILE = "sceneId";
+    //    public static final String SCENEID_FILE = "sceneIdWhite";
+    //    public static final String ZNODEDATE_FILE = "znodeDate";
+    //    public static final String SCENEID_FILE_2 = "sceneIdWhite";
+    public static final String SCENEID_MAP = "sceneIdMap";
+
 
     public static final String BRAND_UNKNOWN = "unknown";
     public static final String SHOP_SCENEIDS_URL = "sceneIdsUrl";
@@ -37,7 +43,9 @@ public class Common {
     public static final int EMPLOYEE_VALUE = 2;
     public static final int MACHINE_VALUE = 3;
     public static final String SCENEID_MONITOR_PATH = "sceneid.monitor.path";
-    public static final String RSSI_MONITOR_PATH = "rssi.monitor.path" ;
+    public static final String ZERO_DWELL_SCENEID_MONITOR_PATH = "ZeroDwellSceneid.monitor.path";
+    public static final String RSSI_MONITOR_PATH = "rssi.monitor.path";
+    public static final String NUM_THREADS = "numThreads";
 
     public static final String SPARK_CONFIG = "sparkRssiInfo.xml";
     public static final String KAFKA_METADATA_BROKER = "metadata.broker.list";
@@ -68,7 +76,7 @@ public class Common {
     public static final String MONGO_OPTION_SIZE = "$size";
     public static final String MONGO_OPTION_ADDTOSET = "$addToSet";
     public static final String MONGO_OPTION_IN = "$in";
-    public static final String MONGO_OPTION_EXISTS    = "$exists";
+    public static final String MONGO_OPTION_EXISTS = "$exists";
 
     public static final String MONGO_COLLECTION_SHOP_HISTORY = "shop_history";
     public static final String MONGO_HISTORY_SHOP_SCENEID = "sceneId";

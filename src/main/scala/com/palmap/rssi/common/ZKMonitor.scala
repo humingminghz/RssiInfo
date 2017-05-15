@@ -1,5 +1,7 @@
 package com.palmap.rssi.common
 
+import java.io.{File, PrintWriter}
+
 import org.apache.curator.framework.recipes.cache.{NodeCache, NodeCacheListener}
 import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.retry.ExponentialBackoffRetry
@@ -13,7 +15,7 @@ object ZKMonitor {
   val xmlConf = GeneralMethods.getConf(Common.SPARK_CONFIG)
   val zkMapMonitorPath = xmlConf(Common.ZK_MAP_MONITOR_PATH)
   val sceneIdPath = xmlConf(Common.SCENEID_MONITOR_PATH)
-
+//  val zeroDewllSceneIdPath = xmlConf(Common.ZERO_DWELL_SCENEID_MONITOR_PATH)
   def startMonitor() = {
     val retryPolicy = new ExponentialBackoffRetry(1000,3)
     val client: CuratorFramework = CuratorFrameworkFactory.newClient(xmlConf(Common.ZOOKEEPER_QUORUM), retryPolicy)
@@ -23,9 +25,13 @@ object ZKMonitor {
     confEnsurePath.ensure(client.getZookeeperClient)
 
     val nodeMonitor = confNodeCache(client, zkMapMonitorPath)
+    val mapNodeMonitor = MapNodeCache(client,zkMapMonitorPath)
     val sceneIdMonitor = updateSceneIdNodeCache(client, sceneIdPath)
+    //add by yuyingchao
+    //val zeroDewllSceneIdMonitor = updateSceneIdNodeCache(client, zeroDewllSceneIdPath)
     nodeMonitor.start(true)
-    sceneIdMonitor.start(true)
+   // sceneIdMonitor.start(true)
+    mapNodeMonitor.start(true)
     println(zkMapMonitorPath + " start zk monitor....")
 
   }
@@ -39,6 +45,32 @@ object ZKMonitor {
           CommonConf.sceneIdlist += znodeData.toInt
         }catch {
           case e: Exception => println("bad sceneId zkNode data: " + znodeData)
+        }
+      }
+    })
+    cache
+  }
+
+  /**
+    * add by yuyingchao 20170515
+    * @param client
+    * @param path
+    * @return
+    */
+  def MapNodeCache(client: CuratorFramework, path: String): NodeCache = {
+    val cache: NodeCache  = new NodeCache (client, path)
+    cache.getListenable.addListener(new NodeCacheListener {
+      override def nodeChanged(): Unit = {
+        val znodeData = new String(cache.getCurrentData.getData)
+        //println("confNodeCache changed, data is: " + znodeData)
+        try {
+         // ConfInfoSet.getSceneIdlist()
+          val info = znodeData.split(",", -1)
+          //println("map:sceneId:  "+info(0)+" "+"map:dwell: "+info(1))
+          CommonConf.sceneIdlist.add(info(0).toInt)
+          CommonConf.sceneIdMap.put(info(0).toInt,info(1).toInt)
+        } catch {
+          case e: Exception => println("bad zkNode data: " + znodeData)
         }
       }
     })
@@ -70,6 +102,5 @@ object ZKMonitor {
     })
     cache
   }
-
 
 }

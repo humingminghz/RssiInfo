@@ -3,16 +3,16 @@ package com.palmap.rssi.funcs
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import com.mongodb.{WriteConcern, BasicDBObject}
-import com.palmap.rssi.common.{Common, MongoFactory}
+import com.mongodb.{BasicDBObject, WriteConcern}
+import com.palmap.rssi.common.{Common, CommonConf, MongoFactory}
 import com.palmap.rssi.message.ShopStore.Visitor
 import org.apache.spark.rdd.RDD
 
 import scala.collection.mutable.ListBuffer
 
 /**
- * Created by admin on 2015/12/22.
- */
+  * Created by admin on 2015/12/22.
+  */
 object VisitedFuncs {
 
   def calVisitorDwell(iter: Iterator[(String, Array[Byte])]): Iterator[(String, Array[Byte])] = {
@@ -21,7 +21,7 @@ object VisitedFuncs {
       val visitorCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_VISITED)
       val historyCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_HISTORY)
       val realTimeCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_REALTIME)
-//      val shopTypeInfoCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_TYPE_INFO)
+      //      val shopTypeInfoCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_TYPE_INFO)
 
       iter.foreach(item => {
         val visitorBuilder = Visitor.newBuilder().mergeFrom(item._2, 0, item._2.length)
@@ -41,7 +41,7 @@ object VisitedFuncs {
           .append(Common.MONGO_HISTORY_SHOP_LASTDATE, 1)
           .append(Common.MONGO_HISTORY_SHOP_TIMES, 1)
 
-        //历史查询， 获取到访次数
+        //历史查询,获取到访次数
         val reList = historyCollection.find(queryBasic, findBasic).toList
         var times = 0
         var freq: Int = 0
@@ -74,14 +74,14 @@ object VisitedFuncs {
         if (intervalTime <= Common.INTERVATE_MINUTE) {
           dwell = intervalTime;
         }
-//        val queryTypeInfo = new BasicDBObject(Common.MONGO_COLLECTION_SHOP_SCENEIDS, sceneId)
-//        val colTypeInfo = new BasicDBObject(Common.MONGO_OPTION_ID, 0).append(Common.MONGO_COLLECTION_SHOP_CUSTOMERDWELL, 1)
+        //        val queryTypeInfo = new BasicDBObject(Common.MONGO_COLLECTION_SHOP_SCENEIDS, sceneId)
+        //        val colTypeInfo = new BasicDBObject(Common.MONGO_OPTION_ID, 0).append(Common.MONGO_COLLECTION_SHOP_CUSTOMERDWELL, 1)
         //查询顾客判定条件
-//        val dwellList = shopTypeInfoCollection.find(queryTypeInfo, colTypeInfo).toList
-//        var customerFlag = 0
-//        if (dwellList.size > 0) {
-//          customerFlag = dwellList.head.get(Common.MONGO_COLLECTION_SHOP_CUSTOMERDWELL).toString.toInt
-//        }
+        //        val dwellList = shopTypeInfoCollection.find(queryTypeInfo, colTypeInfo).toList
+        //        var customerFlag = 0
+        //        if (dwellList.size > 0) {
+        //          customerFlag = dwellList.head.get(Common.MONGO_COLLECTION_SHOP_CUSTOMERDWELL).toString.toInt
+        //        }
 
         val queryVisit = new BasicDBObject()
           .append(Common.MONGO_SHOP_VISITED_DATE, dayTime)
@@ -94,11 +94,23 @@ object VisitedFuncs {
         var isCustomer = false
         if (reDwell.size > 0 && reDwell.head.containsField(Common.MONGO_SHOP_VISITED_DWELL)) {
           val dwellAgo = reDwell.head.get(Common.MONGO_SHOP_VISITED_DWELL).toString.toInt
-          isCustomer = dwellAgo + dwell > 5
-          if(sceneId == 10062) {
+          //add by yuyingchao
+          if (CommonConf.sceneIdMap.contains(sceneId)) {
+            val setDwell = CommonConf.sceneIdMap.getOrElse(sceneId, 5)
+            isCustomer = dwellAgo + dwell > setDwell
+          } else if (sceneId == 10062) {
             isCustomer = !(phoneBrand.equals(Common.BRAND_UNKNOWN));
+          } else {
+            isCustomer = dwellAgo + dwell > 5
           }
         }
+
+        if (CommonConf.sceneIdMap.get(sceneId) == Some(0)) {
+          val setDwell = CommonConf.sceneIdMap.getOrElse(sceneId, 5)
+
+          isCustomer = dwell > setDwell
+        }
+
         val updateBasic = new BasicDBObject()
           .append(Common.MONGO_SHOP_VISITED_TIMES, times)
           .append(Common.MONGO_SHOP_VISITED_FREQUENCY, freq)
@@ -190,8 +202,7 @@ object VisitedFuncs {
 
 
   def calcDwell(rdd: RDD[(String, Array[Byte])]): Unit = {
-    rdd.foreachPartition { partition =>
-    {
+    rdd.foreachPartition { partition => {
       try {
         val visitedCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_VISITED)
         val historyCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_HISTORY)
