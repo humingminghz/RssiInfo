@@ -2,4 +2,9 @@
 /target/
 /.idea/
 /frost.iml
-src/main/resources/sparkRssiInfo.xml
+frost-checkpoint
+mac_brand
+machineBrand_list
+machine_list
+sceneIdMap
+sparkRssiInfo.xml
