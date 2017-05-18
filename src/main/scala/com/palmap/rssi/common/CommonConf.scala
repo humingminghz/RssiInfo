@@ -6,8 +6,10 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 /**
- * Created by lingling.dai on 2016/1/12.
- */
+*  Created on 2016/1/12.
+*
+* @author lingling.dai
+*/
 object CommonConf {
   //machine set
   val machineSet = scala.collection.mutable.HashSet[String]()
