@@ -1,6 +1,6 @@
 package com.palmap.rssi.common
 
-import java.io.{File, PrintWriter}
+import scala.collection.mutable
 
 import org.apache.curator.framework.recipes.cache.{NodeCache, NodeCacheListener}
 import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
@@ -9,14 +9,18 @@ import org.apache.curator.utils.EnsurePath
 
 
 /**
- * Created by lingling.dai on 2015/12/15.
- */
+*  Created on 2015/12/15.
+*
+* @author lingling.dai
+*/
 object ZKMonitor {
-  val xmlConf = GeneralMethods.getConf(Common.SPARK_CONFIG)
-  val zkMapMonitorPath = xmlConf(Common.ZK_MAP_MONITOR_PATH)
-  val sceneIdPath = xmlConf(Common.SCENEID_MONITOR_PATH)
-//  val zeroDewllSceneIdPath = xmlConf(Common.ZERO_DWELL_SCENEID_MONITOR_PATH)
-  def startMonitor() = {
+
+  val xmlConf: mutable.Map[String, String] = GeneralMethods.getConf(Common.SPARK_CONFIG)
+  val zkMapMonitorPath: String = xmlConf(Common.ZK_MAP_MONITOR_PATH)
+  val sceneIdPath: String = xmlConf(Common.SCENE_ID_MONITOR_PATH)
+
+  def startMonitor(): Unit = {
+
     val retryPolicy = new ExponentialBackoffRetry(1000,3)
     val client: CuratorFramework = CuratorFrameworkFactory.newClient(xmlConf(Common.ZOOKEEPER_QUORUM), retryPolicy)
     client.start()
@@ -26,80 +30,93 @@ object ZKMonitor {
 
     val nodeMonitor = confNodeCache(client, zkMapMonitorPath)
     val mapNodeMonitor = MapNodeCache(client,zkMapMonitorPath)
-    val sceneIdMonitor = updateSceneIdNodeCache(client, sceneIdPath)
-    //add by yuyingchao
-    //val zeroDewllSceneIdMonitor = updateSceneIdNodeCache(client, zeroDewllSceneIdPath)
-    nodeMonitor.start(true)
-   // sceneIdMonitor.start(true)
-    mapNodeMonitor.start(true)
-    println(zkMapMonitorPath + " start zk monitor....")
 
+    nodeMonitor.start(true)
+    mapNodeMonitor.start(true)
+
+    println(zkMapMonitorPath + " start zk monitor....")
   }
 
   def updateSceneIdNodeCache(client: CuratorFramework, path: String): NodeCache = {
+
     val cache: NodeCache  = new NodeCache (client, path)
+
     cache.getListenable.addListener(new NodeCacheListener {
+
       override def nodeChanged(): Unit = {
-        val znodeData = new String(cache.getCurrentData.getData)
+
+        val zNodeData = new String(cache.getCurrentData.getData)
+
         try{
-          CommonConf.sceneIdlist += znodeData.toInt
+          CommonConf.sceneIdlist += zNodeData.toInt
         }catch {
-          case e: Exception => println("bad sceneId zkNode data: " + znodeData)
+          case _: Exception => println("bad sceneId zkNode data: " + zNodeData)
         }
       }
     })
+
     cache
   }
 
   /**
-    * add by yuyingchao 20170515
+    * @author yuyingchao 20170515
     * @param client
     * @param path
     * @return
     */
   def MapNodeCache(client: CuratorFramework, path: String): NodeCache = {
+
     val cache: NodeCache  = new NodeCache (client, path)
+
     cache.getListenable.addListener(new NodeCacheListener {
+
       override def nodeChanged(): Unit = {
-        val znodeData = new String(cache.getCurrentData.getData)
-        //println("confNodeCache changed, data is: " + znodeData)
+
+        val zNodeData = new String(cache.getCurrentData.getData)
+
         try {
-         // ConfInfoSet.getSceneIdlist()
-          val info = znodeData.split(",", -1)
-          //println("map:sceneId:  "+info(0)+" "+"map:dwell: "+info(1))
+          val info = zNodeData.split(",", -1)
           CommonConf.sceneIdlist.add(info(0).toInt)
           CommonConf.sceneIdMap.put(info(0).toInt,info(1).toInt)
         } catch {
-          case e: Exception => println("bad zkNode data: " + znodeData)
+          case _: Exception => println("bad zkNode data: " + zNodeData)
         }
       }
     })
+
     cache
   }
 
   def confNodeCache(client: CuratorFramework, path: String): NodeCache = {
-    val cache: NodeCache  = new NodeCache (client, path)
-    cache.getListenable.addListener(new NodeCacheListener {
-      override def nodeChanged(): Unit = {
-        val znodeData = new String(cache.getCurrentData.getData)
-        println("confNodeCache changed, data is: " + znodeData)
-        try {
-          ConfInfoSet.getSceneIdlist()
 
-          val info = znodeData.split(Common.CTRL_A, -1)
+    val cache: NodeCache  = new NodeCache (client, path)
+
+    cache.getListenable.addListener(new NodeCacheListener {
+
+      override def nodeChanged(): Unit = {
+
+        val zNodeData = new String(cache.getCurrentData.getData)
+        println("confNodeCache changed, data is: " + zNodeData)
+
+        try {
+
+          ConfInfoSet.initSceneIdList()
+
+          val info = zNodeData.split(Common.CTRL_A, -1)
+
           info(0) match {
-            case Common.STORE_BUSINESS_HOURS => {
+            case Common.STORE_BUSINESS_HOURS =>
               val sceneId =  info(1).toInt
               ConfInfoSet.updateBusinessHourMap(sceneId)
-            }
             case  Common.ZK_MACHINE_SET => ConfInfoSet.updateMachineSet() //update machine set
             case _ => println(info(0))
           }
         } catch {
-          case e: Exception => println("bad zkNode data: " + znodeData)
+          case _: Exception => println("bad zkNode data: " + zNodeData)
         }
       }
     })
+
     cache
   }
 

@@ -16,6 +16,7 @@ message RssiItem {
   required string id_data = 1;
   required IdType id_type = 2;
   required int32  rssi = 3;
+  optional bool connected = 4;
 }
 
 message RssiInfo {
