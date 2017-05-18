@@ -6,12 +6,12 @@ package com.palmap.rssi.message;
 public final class ShopStore {
   private ShopStore() {}
   public static void registerAllExtensions(
-          com.google.protobuf.ExtensionRegistry registry) {
+      com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface VisitorOrBuilder extends
-          // @@protoc_insertion_point(interface_extends:palmapmsg.Visitor)
-          com.google.protobuf.MessageOrBuilder {
+  public interface VisitorOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional bytes phone_mac = 1;
     /**
      * <code>optional bytes phone_mac = 1;</code>
      */
@@ -21,6 +21,7 @@ public final class ShopStore {
      */
     com.google.protobuf.ByteString getPhoneMac();
 
+    // optional int32 scene_id = 2;
     /**
      * <code>optional int32 scene_id = 2;</code>
      */
@@ -30,6 +31,7 @@ public final class ShopStore {
      */
     int getSceneId();
 
+    // optional bytes phone_brand = 3;
     /**
      * <code>optional bytes phone_brand = 3;</code>
      */
@@ -39,6 +41,7 @@ public final class ShopStore {
      */
     com.google.protobuf.ByteString getPhoneBrand();
 
+    // optional uint64 time_stamp = 4;
     /**
      * <code>optional uint64 time_stamp = 4;</code>
      */
@@ -48,6 +51,7 @@ public final class ShopStore {
      */
     long getTimeStamp();
 
+    // optional bool isCustomer = 5;
     /**
      * <code>optional bool isCustomer = 5;</code>
      */
@@ -57,10 +61,11 @@ public final class ShopStore {
      */
     boolean getIsCustomer();
 
+    // repeated sint32 rssi = 6;
     /**
      * <code>repeated sint32 rssi = 6;</code>
      */
-    java.util.List<java.lang.Integer> getRssiList();
+    java.util.List<Integer> getRssiList();
     /**
      * <code>repeated sint32 rssi = 6;</code>
      */
@@ -74,9 +79,8 @@ public final class ShopStore {
    * Protobuf type {@code palmapmsg.Visitor}
    */
   public static final class Visitor extends
-          com.google.protobuf.GeneratedMessage implements
-          // @@protoc_insertion_point(message_implements:palmapmsg.Visitor)
-          VisitorOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements VisitorOrBuilder {
     // Use Visitor.newBuilder() to construct.
     private Visitor(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -94,19 +98,19 @@ public final class ShopStore {
     }
 
     private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
+    @Override
     public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
+        getUnknownFields() {
       return this.unknownFields;
     }
     private Visitor(
-            com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
       initFields();
       int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-              com.google.protobuf.UnknownFieldSet.newBuilder();
+          com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
         boolean done = false;
         while (!done) {
@@ -117,7 +121,7 @@ public final class ShopStore {
               break;
             default: {
               if (!parseUnknownField(input, unknownFields,
-                      extensionRegistry, tag)) {
+                                     extensionRegistry, tag)) {
                 done = true;
               }
               break;
@@ -149,7 +153,7 @@ public final class ShopStore {
             }
             case 48: {
               if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
-                rssi_ = new java.util.ArrayList<java.lang.Integer>();
+                rssi_ = new java.util.ArrayList<Integer>();
                 mutable_bitField0_ |= 0x00000020;
               }
               rssi_.add(input.readSInt32());
@@ -159,7 +163,7 @@ public final class ShopStore {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
               if (!((mutable_bitField0_ & 0x00000020) == 0x00000020) && input.getBytesUntilLimit() > 0) {
-                rssi_ = new java.util.ArrayList<java.lang.Integer>();
+                rssi_ = new java.util.ArrayList<Integer>();
                 mutable_bitField0_ |= 0x00000020;
               }
               while (input.getBytesUntilLimit() > 0) {
@@ -174,7 +178,7 @@ public final class ShopStore {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
-                e.getMessage()).setUnfinishedMessage(this);
+            e.getMessage()).setUnfinishedMessage(this);
       } finally {
         if (((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
           rssi_ = java.util.Collections.unmodifiableList(rssi_);
@@ -184,33 +188,34 @@ public final class ShopStore {
       }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
-    getDescriptor() {
-      return com.palmap.rssi.message.ShopStore.internal_static_palmapmsg_Visitor_descriptor;
+        getDescriptor() {
+      return ShopStore.internal_static_palmapmsg_Visitor_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-    internalGetFieldAccessorTable() {
-      return com.palmap.rssi.message.ShopStore.internal_static_palmapmsg_Visitor_fieldAccessorTable
-              .ensureFieldAccessorsInitialized(
-                      com.palmap.rssi.message.ShopStore.Visitor.class, com.palmap.rssi.message.ShopStore.Visitor.Builder.class);
+    protected FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return ShopStore.internal_static_palmapmsg_Visitor_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              Visitor.class, Builder.class);
     }
 
     public static com.google.protobuf.Parser<Visitor> PARSER =
-            new com.google.protobuf.AbstractParser<Visitor>() {
-              public Visitor parsePartialFrom(
-                      com.google.protobuf.CodedInputStream input,
-                      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                      throws com.google.protobuf.InvalidProtocolBufferException {
-                return new Visitor(input, extensionRegistry);
-              }
-            };
+        new com.google.protobuf.AbstractParser<Visitor>() {
+      public Visitor parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new Visitor(input, extensionRegistry);
+      }
+    };
 
-    @java.lang.Override
+    @Override
     public com.google.protobuf.Parser<Visitor> getParserForType() {
       return PARSER;
     }
 
     private int bitField0_;
+    // optional bytes phone_mac = 1;
     public static final int PHONE_MAC_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString phoneMac_;
     /**
@@ -226,6 +231,7 @@ public final class ShopStore {
       return phoneMac_;
     }
 
+    // optional int32 scene_id = 2;
     public static final int SCENE_ID_FIELD_NUMBER = 2;
     private int sceneId_;
     /**
@@ -241,6 +247,7 @@ public final class ShopStore {
       return sceneId_;
     }
 
+    // optional bytes phone_brand = 3;
     public static final int PHONE_BRAND_FIELD_NUMBER = 3;
     private com.google.protobuf.ByteString phoneBrand_;
     /**
@@ -256,6 +263,7 @@ public final class ShopStore {
       return phoneBrand_;
     }
 
+    // optional uint64 time_stamp = 4;
     public static final int TIME_STAMP_FIELD_NUMBER = 4;
     private long timeStamp_;
     /**
@@ -271,6 +279,7 @@ public final class ShopStore {
       return timeStamp_;
     }
 
+    // optional bool isCustomer = 5;
     public static final int ISCUSTOMER_FIELD_NUMBER = 5;
     private boolean isCustomer_;
     /**
@@ -286,13 +295,14 @@ public final class ShopStore {
       return isCustomer_;
     }
 
+    // repeated sint32 rssi = 6;
     public static final int RSSI_FIELD_NUMBER = 6;
-    private java.util.List<java.lang.Integer> rssi_;
+    private java.util.List<Integer> rssi_;
     /**
      * <code>repeated sint32 rssi = 6;</code>
      */
-    public java.util.List<java.lang.Integer>
-    getRssiList() {
+    public java.util.List<Integer>
+        getRssiList() {
       return rssi_;
     }
     /**
@@ -319,15 +329,14 @@ public final class ShopStore {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
     }
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
-            throws java.io.IOException {
+                        throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeBytes(1, phoneMac_);
@@ -358,29 +367,29 @@ public final class ShopStore {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-                .computeBytesSize(1, phoneMac_);
+          .computeBytesSize(1, phoneMac_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-                .computeInt32Size(2, sceneId_);
+          .computeInt32Size(2, sceneId_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-                .computeBytesSize(3, phoneBrand_);
+          .computeBytesSize(3, phoneBrand_);
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
-                .computeUInt64Size(4, timeStamp_);
+          .computeUInt64Size(4, timeStamp_);
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
-                .computeBoolSize(5, isCustomer_);
+          .computeBoolSize(5, isCustomer_);
       }
       {
         int dataSize = 0;
         for (int i = 0; i < rssi_.size(); i++) {
           dataSize += com.google.protobuf.CodedOutputStream
-                  .computeSInt32SizeNoTag(rssi_.get(i));
+            .computeSInt32SizeNoTag(rssi_.get(i));
         }
         size += dataSize;
         size += 1 * getRssiList().size();
@@ -391,75 +400,75 @@ public final class ShopStore {
     }
 
     private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-            throws java.io.ObjectStreamException {
+    @Override
+    protected Object writeReplace()
+        throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
 
-    public static com.palmap.rssi.message.ShopStore.Visitor parseFrom(
-            com.google.protobuf.ByteString data)
-            throws com.google.protobuf.InvalidProtocolBufferException {
+    public static Visitor parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.palmap.rssi.message.ShopStore.Visitor parseFrom(
-            com.google.protobuf.ByteString data,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
+    public static Visitor parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.palmap.rssi.message.ShopStore.Visitor parseFrom(byte[] data)
-            throws com.google.protobuf.InvalidProtocolBufferException {
+    public static Visitor parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.palmap.rssi.message.ShopStore.Visitor parseFrom(
-            byte[] data,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
+    public static Visitor parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.palmap.rssi.message.ShopStore.Visitor parseFrom(java.io.InputStream input)
-            throws java.io.IOException {
+    public static Visitor parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static com.palmap.rssi.message.ShopStore.Visitor parseFrom(
-            java.io.InputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
+    public static Visitor parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static com.palmap.rssi.message.ShopStore.Visitor parseDelimitedFrom(java.io.InputStream input)
-            throws java.io.IOException {
+    public static Visitor parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-    public static com.palmap.rssi.message.ShopStore.Visitor parseDelimitedFrom(
-            java.io.InputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
+    public static Visitor parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
-    public static com.palmap.rssi.message.ShopStore.Visitor parseFrom(
-            com.google.protobuf.CodedInputStream input)
-            throws java.io.IOException {
+    public static Visitor parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static com.palmap.rssi.message.ShopStore.Visitor parseFrom(
-            com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
+    public static Visitor parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
 
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(com.palmap.rssi.message.ShopStore.Visitor prototype) {
+    public static Builder newBuilder(Visitor prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
 
-    @java.lang.Override
+    @Override
     protected Builder newBuilderForType(
-            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -467,19 +476,18 @@ public final class ShopStore {
      * Protobuf type {@code palmapmsg.Visitor}
      */
     public static final class Builder extends
-            com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-            // @@protoc_insertion_point(builder_implements:palmapmsg.Visitor)
-            com.palmap.rssi.message.ShopStore.VisitorOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements VisitorOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
-      getDescriptor() {
-        return com.palmap.rssi.message.ShopStore.internal_static_palmapmsg_Visitor_descriptor;
+          getDescriptor() {
+        return ShopStore.internal_static_palmapmsg_Visitor_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internalGetFieldAccessorTable() {
-        return com.palmap.rssi.message.ShopStore.internal_static_palmapmsg_Visitor_fieldAccessorTable
-                .ensureFieldAccessorsInitialized(
-                        com.palmap.rssi.message.ShopStore.Visitor.class, com.palmap.rssi.message.ShopStore.Visitor.Builder.class);
+      protected FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return ShopStore.internal_static_palmapmsg_Visitor_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                Visitor.class, Builder.class);
       }
 
       // Construct using com.palmap.rssi.message.ShopStore.Visitor.newBuilder()
@@ -488,7 +496,7 @@ public final class ShopStore {
       }
 
       private Builder(
-              com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -522,24 +530,24 @@ public final class ShopStore {
       }
 
       public com.google.protobuf.Descriptors.Descriptor
-      getDescriptorForType() {
-        return com.palmap.rssi.message.ShopStore.internal_static_palmapmsg_Visitor_descriptor;
+          getDescriptorForType() {
+        return ShopStore.internal_static_palmapmsg_Visitor_descriptor;
       }
 
-      public com.palmap.rssi.message.ShopStore.Visitor getDefaultInstanceForType() {
-        return com.palmap.rssi.message.ShopStore.Visitor.getDefaultInstance();
+      public Visitor getDefaultInstanceForType() {
+        return Visitor.getDefaultInstance();
       }
 
-      public com.palmap.rssi.message.ShopStore.Visitor build() {
-        com.palmap.rssi.message.ShopStore.Visitor result = buildPartial();
+      public Visitor build() {
+        Visitor result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public com.palmap.rssi.message.ShopStore.Visitor buildPartial() {
-        com.palmap.rssi.message.ShopStore.Visitor result = new com.palmap.rssi.message.ShopStore.Visitor(this);
+      public Visitor buildPartial() {
+        Visitor result = new Visitor(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -573,16 +581,16 @@ public final class ShopStore {
       }
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.palmap.rssi.message.ShopStore.Visitor) {
-          return mergeFrom((com.palmap.rssi.message.ShopStore.Visitor)other);
+        if (other instanceof Visitor) {
+          return mergeFrom((Visitor)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.palmap.rssi.message.ShopStore.Visitor other) {
-        if (other == com.palmap.rssi.message.ShopStore.Visitor.getDefaultInstance()) return this;
+      public Builder mergeFrom(Visitor other) {
+        if (other == Visitor.getDefaultInstance()) return this;
         if (other.hasPhoneMac()) {
           setPhoneMac(other.getPhoneMac());
         }
@@ -617,14 +625,14 @@ public final class ShopStore {
       }
 
       public Builder mergeFrom(
-              com.google.protobuf.CodedInputStream input,
-              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-              throws java.io.IOException {
-        com.palmap.rssi.message.ShopStore.Visitor parsedMessage = null;
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        Visitor parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.palmap.rssi.message.ShopStore.Visitor) e.getUnfinishedMessage();
+          parsedMessage = (Visitor) e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -635,6 +643,7 @@ public final class ShopStore {
       }
       private int bitField0_;
 
+      // optional bytes phone_mac = 1;
       private com.google.protobuf.ByteString phoneMac_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes phone_mac = 1;</code>
@@ -653,9 +662,9 @@ public final class ShopStore {
        */
       public Builder setPhoneMac(com.google.protobuf.ByteString value) {
         if (value == null) {
-          throw new NullPointerException();
-        }
-        bitField0_ |= 0x00000001;
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
         phoneMac_ = value;
         onChanged();
         return this;
@@ -670,6 +679,7 @@ public final class ShopStore {
         return this;
       }
 
+      // optional int32 scene_id = 2;
       private int sceneId_ ;
       /**
        * <code>optional int32 scene_id = 2;</code>
@@ -702,6 +712,7 @@ public final class ShopStore {
         return this;
       }
 
+      // optional bytes phone_brand = 3;
       private com.google.protobuf.ByteString phoneBrand_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes phone_brand = 3;</code>
@@ -720,9 +731,9 @@ public final class ShopStore {
        */
       public Builder setPhoneBrand(com.google.protobuf.ByteString value) {
         if (value == null) {
-          throw new NullPointerException();
-        }
-        bitField0_ |= 0x00000004;
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
         phoneBrand_ = value;
         onChanged();
         return this;
@@ -737,6 +748,7 @@ public final class ShopStore {
         return this;
       }
 
+      // optional uint64 time_stamp = 4;
       private long timeStamp_ ;
       /**
        * <code>optional uint64 time_stamp = 4;</code>
@@ -769,6 +781,7 @@ public final class ShopStore {
         return this;
       }
 
+      // optional bool isCustomer = 5;
       private boolean isCustomer_ ;
       /**
        * <code>optional bool isCustomer = 5;</code>
@@ -801,18 +814,19 @@ public final class ShopStore {
         return this;
       }
 
-      private java.util.List<java.lang.Integer> rssi_ = java.util.Collections.emptyList();
+      // repeated sint32 rssi = 6;
+      private java.util.List<Integer> rssi_ = java.util.Collections.emptyList();
       private void ensureRssiIsMutable() {
         if (!((bitField0_ & 0x00000020) == 0x00000020)) {
-          rssi_ = new java.util.ArrayList<java.lang.Integer>(rssi_);
+          rssi_ = new java.util.ArrayList<Integer>(rssi_);
           bitField0_ |= 0x00000020;
-        }
+         }
       }
       /**
        * <code>repeated sint32 rssi = 6;</code>
        */
-      public java.util.List<java.lang.Integer>
-      getRssiList() {
+      public java.util.List<Integer>
+          getRssiList() {
         return java.util.Collections.unmodifiableList(rssi_);
       }
       /**
@@ -831,7 +845,7 @@ public final class ShopStore {
        * <code>repeated sint32 rssi = 6;</code>
        */
       public Builder setRssi(
-              int index, int value) {
+          int index, int value) {
         ensureRssiIsMutable();
         rssi_.set(index, value);
         onChanged();
@@ -850,10 +864,9 @@ public final class ShopStore {
        * <code>repeated sint32 rssi = 6;</code>
        */
       public Builder addAllRssi(
-              java.lang.Iterable<? extends java.lang.Integer> values) {
+          Iterable<? extends Integer> values) {
         ensureRssiIsMutable();
-        com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                values, rssi_);
+        super.addAll(values, rssi_);
         onChanged();
         return this;
       }
@@ -878,44 +891,44 @@ public final class ShopStore {
     // @@protoc_insertion_point(class_scope:palmapmsg.Visitor)
   }
 
-  private static final com.google.protobuf.Descriptors.Descriptor
-          internal_static_palmapmsg_Visitor_descriptor;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_palmapmsg_Visitor_descriptor;
   private static
-  com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internal_static_palmapmsg_Visitor_fieldAccessorTable;
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_palmapmsg_Visitor_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
-  getDescriptor() {
+      getDescriptor() {
     return descriptor;
   }
   private static com.google.protobuf.Descriptors.FileDescriptor
-          descriptor;
+      descriptor;
   static {
-    java.lang.String[] descriptorData = {
-            "\n\017shopStore.proto\022\tpalmapmsg\"y\n\007Visitor\022" +
-                    "\021\n\tphone_mac\030\001 \001(\014\022\020\n\010scene_id\030\002 \001(\005\022\023\n\013" +
-                    "phone_brand\030\003 \001(\014\022\022\n\ntime_stamp\030\004 \001(\004\022\022\n" +
-                    "\nisCustomer\030\005 \001(\010\022\014\n\004rssi\030\006 \003(\021B\031\n\027com.p" +
-                    "almap.rssi.message"
+    String[] descriptorData = {
+      "\n\017shopStore.proto\022\tpalmapmsg\"y\n\007Visitor\022" +
+      "\021\n\tphone_mac\030\001 \001(\014\022\020\n\010scene_id\030\002 \001(\005\022\023\n\013" +
+      "phone_brand\030\003 \001(\014\022\022\n\ntime_stamp\030\004 \001(\004\022\022\n" +
+      "\nisCustomer\030\005 \001(\010\022\014\n\004rssi\030\006 \003(\021B\031\n\027com.p" +
+      "almap.rssi.message"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-            new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-              public com.google.protobuf.ExtensionRegistry assignDescriptors(
-                      com.google.protobuf.Descriptors.FileDescriptor root) {
-                descriptor = root;
-                return null;
-              }
-            };
-    com.google.protobuf.Descriptors.FileDescriptor
-            .internalBuildGeneratedFileFrom(descriptorData,
-                    new com.google.protobuf.Descriptors.FileDescriptor[] {
-                    }, assigner);
-    internal_static_palmapmsg_Visitor_descriptor =
+      new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
+        public com.google.protobuf.ExtensionRegistry assignDescriptors(
+            com.google.protobuf.Descriptors.FileDescriptor root) {
+          descriptor = root;
+          internal_static_palmapmsg_Visitor_descriptor =
             getDescriptor().getMessageTypes().get(0);
-    internal_static_palmapmsg_Visitor_fieldAccessorTable = new
+          internal_static_palmapmsg_Visitor_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-            internal_static_palmapmsg_Visitor_descriptor,
-            new java.lang.String[] { "PhoneMac", "SceneId", "PhoneBrand", "TimeStamp", "IsCustomer", "Rssi", });
+              internal_static_palmapmsg_Visitor_descriptor,
+              new String[] { "PhoneMac", "SceneId", "PhoneBrand", "TimeStamp", "IsCustomer", "Rssi", });
+          return null;
+        }
+      };
+    com.google.protobuf.Descriptors.FileDescriptor
+      .internalBuildGeneratedFileFrom(descriptorData,
+        new com.google.protobuf.Descriptors.FileDescriptor[] {
+        }, assigner);
   }
 
   // @@protoc_insertion_point(outer_class_scope)

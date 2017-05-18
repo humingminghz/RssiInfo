@@ -227,6 +227,16 @@ public final class FrostEvent {
      * <code>required int32 rssi = 3;</code>
      */
     int getRssi();
+
+    // optional bool connected = 4;
+    /**
+     * <code>optional bool connected = 4;</code>
+     */
+    boolean hasConnected();
+    /**
+     * <code>optional bool connected = 4;</code>
+     */
+    boolean getConnected();
   }
   /**
    * Protobuf type {@code com.palmap.rssi.message.RssiItem}
@@ -298,6 +308,11 @@ public final class FrostEvent {
             case 24: {
               bitField0_ |= 0x00000004;
               rssi_ = input.readInt32();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
+              connected_ = input.readBool();
               break;
             }
           }
@@ -415,10 +430,27 @@ public final class FrostEvent {
       return rssi_;
     }
 
+    // optional bool connected = 4;
+    public static final int CONNECTED_FIELD_NUMBER = 4;
+    private boolean connected_;
+    /**
+     * <code>optional bool connected = 4;</code>
+     */
+    public boolean hasConnected() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional bool connected = 4;</code>
+     */
+    public boolean getConnected() {
+      return connected_;
+    }
+
     private void initFields() {
       idData_ = "";
       idType_ = IdType.MAC;
       rssi_ = 0;
+      connected_ = false;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -453,6 +485,9 @@ public final class FrostEvent {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeInt32(3, rssi_);
       }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeBool(4, connected_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -473,6 +508,10 @@ public final class FrostEvent {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(3, rssi_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(4, connected_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -596,6 +635,8 @@ public final class FrostEvent {
         bitField0_ = (bitField0_ & ~0x00000002);
         rssi_ = 0;
         bitField0_ = (bitField0_ & ~0x00000004);
+        connected_ = false;
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -636,6 +677,10 @@ public final class FrostEvent {
           to_bitField0_ |= 0x00000004;
         }
         result.rssi_ = rssi_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.connected_ = connected_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -662,6 +707,9 @@ public final class FrostEvent {
         }
         if (other.hasRssi()) {
           setRssi(other.getRssi());
+        }
+        if (other.hasConnected()) {
+          setConnected(other.getConnected());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -841,6 +889,39 @@ public final class FrostEvent {
       public Builder clearRssi() {
         bitField0_ = (bitField0_ & ~0x00000004);
         rssi_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // optional bool connected = 4;
+      private boolean connected_ ;
+      /**
+       * <code>optional bool connected = 4;</code>
+       */
+      public boolean hasConnected() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional bool connected = 4;</code>
+       */
+      public boolean getConnected() {
+        return connected_;
+      }
+      /**
+       * <code>optional bool connected = 4;</code>
+       */
+      public Builder setConnected(boolean value) {
+        bitField0_ |= 0x00000008;
+        connected_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bool connected = 4;</code>
+       */
+      public Builder clearConnected() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        connected_ = false;
         onChanged();
         return this;
       }
@@ -2103,17 +2184,18 @@ public final class FrostEvent {
   static {
     String[] descriptorData = {
       "\n\020frostEvent.proto\022\027com.palmap.rssi.mess" +
-      "age\"[\n\010RssiItem\022\017\n\007id_data\030\001 \002(\t\0220\n\007id_t" +
+      "age\"n\n\010RssiItem\022\017\n\007id_data\030\001 \002(\t\0220\n\007id_t" +
       "ype\030\002 \002(\0162\037.com.palmap.rssi.message.IdTy" +
-      "pe\022\014\n\004rssi\030\003 \002(\005\"\332\001\n\010RssiInfo\022\017\n\007id_data" +
-      "\030\001 \002(\t\0220\n\007id_type\030\002 \002(\0162\037.com.palmap.rss" +
-      "i.message.IdType\0224\n\tstub_type\030\003 \002(\0162!.co" +
-      "m.palmap.rssi.message.StubType\022\021\n\ttimest" +
-      "amp\030\004 \002(\003\0220\n\005items\030\005 \003(\0132!.com.palmap.rs" +
-      "si.message.RssiItem\022\020\n\010scene_id\030\006 \002(\003*-\n" +
-      "\006IdType\022\007\n\003MAC\020\000\022\010\n\004UUID\020\001\022\020\n\014UNKNOWN_TY",
-      "PE\020\002*8\n\010StubType\022\006\n\002AP\020\000\022\r\n\tBLUETOOTH\020\001\022" +
-      "\025\n\021UNKNOWN_STUB_TYPE\020\002"
+      "pe\022\014\n\004rssi\030\003 \002(\005\022\021\n\tconnected\030\004 \001(\010\"\332\001\n\010" +
+      "RssiInfo\022\017\n\007id_data\030\001 \002(\t\0220\n\007id_type\030\002 \002" +
+      "(\0162\037.com.palmap.rssi.message.IdType\0224\n\ts" +
+      "tub_type\030\003 \002(\0162!.com.palmap.rssi.message" +
+      ".StubType\022\021\n\ttimestamp\030\004 \002(\003\0220\n\005items\030\005 " +
+      "\003(\0132!.com.palmap.rssi.message.RssiItem\022\020" +
+      "\n\010scene_id\030\006 \002(\003*-\n\006IdType\022\007\n\003MAC\020\000\022\010\n\004U",
+      "UID\020\001\022\020\n\014UNKNOWN_TYPE\020\002*8\n\010StubType\022\006\n\002A" +
+      "P\020\000\022\r\n\tBLUETOOTH\020\001\022\025\n\021UNKNOWN_STUB_TYPE\020" +
+      "\002"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -2125,7 +2207,7 @@ public final class FrostEvent {
           internal_static_com_palmap_rssi_message_RssiItem_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_com_palmap_rssi_message_RssiItem_descriptor,
-              new String[] { "IdData", "IdType", "Rssi", });
+              new String[] { "IdData", "IdType", "Rssi", "Connected", });
           internal_static_com_palmap_rssi_message_RssiInfo_descriptor =
             getDescriptor().getMessageTypes().get(1);
           internal_static_com_palmap_rssi_message_RssiInfo_fieldAccessorTable = new
