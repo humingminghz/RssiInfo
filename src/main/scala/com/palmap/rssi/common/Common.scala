@@ -93,8 +93,18 @@ object Common {
     val MONGO_SHOP_REAL_TIME_HOUR_IS_CUSTOMER = "isCustomer"
     val MONGO_SHOP_REAL_TIME_HOUR_MACS = "macs"
 
+    val MONGO_COLLECTION_SHOP_TOTAL_CONNECTION = "shop_connections"
+    val MONGO_SHOP_CONNECTIONS_SCENE_ID = "sceneId"
+    val MONGO_SHOP_CONNECTIONS_TIME = "time"
+    val MONGO_SHOP_CONNECTIONS_IS_CUSTOMER = "isCustomer"
+    val MONGO_SHOP_CONNECTIONS_MACS = "macs"
+    val MONGO_SHOP_CONNECTIONS_MAC_SUM = "macSum"
+
     val MONGO_COLLECTION_SHOP_STATIC_INFO = "shop_static_info"
     val MONGO_STATIC_INFO_SHOP_SCENE_ID = "sceneId"
     val MONGO_STATIC_INFO_SHOP_OPEN_MINUTE = "openMinute"
     val MONGO_STATIC_INFO_SHOP_CLOSE_MINUTE = "closeMinute"
+
+    val SCENE_ID_HUAWEI = 13519  // 华为的sceneId 统计每分钟连接数用
+
 }

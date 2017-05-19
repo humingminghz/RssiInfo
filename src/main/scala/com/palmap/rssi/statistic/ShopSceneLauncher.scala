@@ -2,9 +2,10 @@ package com.palmap.rssi.statistic
 import java.util.Date
 
 import com.palmap.rssi.common.{Common, GeneralMethods}
-import com.palmap.rssi.funcs.{HistoryFuncs, RealTimeFuncs, VisitedFuncs}
+import com.palmap.rssi.funcs._
 import com.palmap.rssi.message.ShopStore.Visitor
 import kafka.serializer.{DefaultDecoder, StringDecoder}
+import org.apache.log4j.{Level, Logger}
 import org.apache.spark.streaming.kafka.KafkaUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.{SparkConf, SparkContext}
@@ -16,6 +17,8 @@ import org.apache.spark.{SparkConf, SparkContext}
 object ShopSceneLauncher {
 
   def main(args: Array[String]): Unit = {
+
+    Logger.getLogger("org").setLevel(Level.OFF)
 
     val sparkRssiInfoXml = GeneralMethods.getConf(Common.SPARK_CONFIG)
     val broker_list = sparkRssiInfoXml(Common.KAFKA_METADATA_BROKER)
@@ -39,18 +42,41 @@ object ShopSceneLauncher {
       KafkaUtils.createDirectStream[String, Array[Byte], StringDecoder, DefaultDecoder](ssc, kafkaParams, Set(topics))
     messagesRdd.count().map(x => "Received " + x + " kafka events.").print()
 
-    val visitorRdd = messagesRdd.map(_._2)
-      .flatMap( ShopUnitFuncs.visitorInfo)
+    val preVisitorRdd = messagesRdd.map(_._2)
+      .flatMap(ShopUnitFuncs.rssiInfo)
       .mapPartitions(ShopUnitFuncs.filterBusinessVisitor)
-      .reduceByKey((record, nextRecord) => {
-        (   record._1 ++ nextRecord._1,  record._2 ++ nextRecord._2)})
+      .reduceByKey((record, nextRecord) => { // 添加Connected 字段判断, 只要有一次链接成功 就认为是true
+        if(record._3 || nextRecord._3){
+          (record._1 ++ nextRecord._1,  record._2 ++ nextRecord._2, true)
+        }else {
+          (record._1 ++ nextRecord._1,  record._2 ++ nextRecord._2, false)
+        } }).cache()
+
+    preVisitorRdd.count().map("preVisitorRdd: " + _).print()
+
+    val visitorRdd = preVisitorRdd
       .mapPartitions(ShopUnitFuncs.buildVisitor)
-      .filter(ShopUnitFuncs.machineMacFilter)
-      .cache()
+      .filter(!_._2.isEmpty).cache()
+    // .filter(ShopUnitFuncs.machineMacFilter)   mac黑名单过滤提前到 ShopUnitFuncs.rssiInfo 中， filter更改为Visitor不为空
+//    preVisitorRdd.foreachRDD(rdd => {
+//      rdd.map(x => println("x._1: " + x._1)).count()
+//      rdd
+//    })
+//    preVisitorRdd.filter(record => record._1.contains(Common.SCENE_ID_HUAWEI.toString) && (record._2._3 == true))
+//      .foreachRDD(rdd => ConnectionsFuncs.saveConnections _) // 将华为的connection 信息存到MongoDB
+
+    preVisitorRdd.foreachRDD( rdd => rdd.foreachPartition( x => x.foreach(x => println(x))))
+    preVisitorRdd.foreachRDD( rdd => ConnectionsFuncs.saveConnections _) // 保存至mongo  目前只算华为id 以及connected是true的
+
+    preVisitorRdd.count().map("process " + _ + " data: saved data to shop Connection " + new Date()).print()
+
+
+    preVisitorRdd.foreachRDD(_.unpersist(false))
+
     //history
     visitorRdd.foreachRDD(HistoryFuncs.saveHistory _)
     visitorRdd.count().map("process " + _ + " data; save data to History. " + new Date()).print
-    visitorRdd.foreachRDD(_.unpersist())
+
 
     //Visited  calcDwellIsCustomer
     val realTimeRdd = visitorRdd
@@ -58,6 +84,9 @@ object ShopSceneLauncher {
       .mapPartitions(RealTimeFuncs.calRealTime)
       .reduceByKey((record, nextRecord) => record ++ nextRecord)
       .cache()
+
+    visitorRdd.foreachRDD(_.unpersist(false)) // realTimeRdd 计算后将visitorRdd从缓存中释放
+
     realTimeRdd.count().map("process " +_ + " data; save data to calVisitorDwell. " + new Date()).print
     realTimeRdd.foreachRDD(RealTimeFuncs.saveRealTime _)
     realTimeRdd.count().map("process " +_ + " data; save data to realTime. " + new Date()).print

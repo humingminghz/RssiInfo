@@ -19,15 +19,21 @@ object ShopUnitFuncs {
   val businessHoursMap: mutable.Map[Int, (Int, Int)] = CommonConf.businessHoursMap
   val sceneIdList: mutable.Set[Int] = CommonConf.sceneIdlist
 
-  def visitorInfo(visitor: Array[Byte]): mutable.HashMap[String, (ArrayBuffer[Int],ArrayBuffer[Int]) ]= {
+  /**
+    * 从kafka传入的rssiInfo 提取相应字段 为构建visitor准备
+    *
+    * @param rssiInfo
+    * @return (sceneId  + Common.CTRL_A + userMac + Common.CTRL_A + minuteTime -> (rssiList, appList, isConnected))
+    */
+  def rssiInfo(rssiInfo: Array[Byte]): mutable.HashMap[String, (ArrayBuffer[Int],ArrayBuffer[Int], Boolean) ]= {
 
-    val visitorMap = mutable.HashMap[String,(ArrayBuffer[Int],ArrayBuffer[Int])]()
-    val builder = RssiInfo.newBuilder().mergeFrom(visitor, 0, visitor.length)
+    val rssiInfoMap = mutable.HashMap[String,(ArrayBuffer[Int],ArrayBuffer[Int], Boolean)]()
+    val builder = RssiInfo.newBuilder().mergeFrom(rssiInfo, 0, rssiInfo.length)
+    val timeStamp = builder.getTimestamp
 
     if (builder.hasSceneId && builder.hasTimestamp && builder.hasIdData
-      && builder.getIdType == IdType.MAC && builder.getStubType == StubType.AP) {
+      && builder.getIdType == IdType.MAC && builder.getStubType == StubType.AP ) { // 必要字段检查
 
-      val timeStamp = builder.getTimestamp
       val sceneId = builder.getSceneId
       val sdf = new SimpleDateFormat(Common.NOW_MINUTE_FORMAT)
       val dateStr = sdf.format(new Date(timeStamp))
@@ -37,29 +43,39 @@ object ShopUnitFuncs {
 
       //过滤本批次要处理的数据
       if (minuteTime == (currentTime - Common.MINUTE_FORMATTER)) {
-
         builder.getItemsList.foreach(item => {
 
-          if (item.hasIdData && item.hasRssi && item.getIdType == IdType.MAC) {
+          val userMac = item.getIdData.toUpperCase()
+          if (!CommonConf.machineBrandSet.contains(userMac.substring(0, 8)) &&
+                  item.hasIdData && item.hasRssi && item.getIdType == IdType.MAC) { // mac不在黑名单内 rssi相关数据存在
 
-            val appList = ArrayBuffer[Int](1)                   // to judeg how many aps contain mac
-            val userMac = item.getIdData.toUpperCase()
+            val appList = ArrayBuffer[Int](1)                   // to judge how many aps contain mac
             val rssi = item.getRssi
+            // 华为场景 添加 Connected 字段 其它场景 默认false 后面不处理其他场景数据
+            var isConnected = false
+            if(sceneId == Common.SCENE_ID_HUAWEI){
+              isConnected = item.getConnected
+            }
+
             val key = sceneId + Common.CTRL_A + userMac + Common.CTRL_A + minuteTime
             var rssiList = ArrayBuffer[Int]()
-
-            if (visitorMap.contains(key)) {
-              rssiList = visitorMap(key)._1
+            // 已存在的key需要将value拿出来后追加当前rssi
+            if (rssiInfoMap.contains(key)) {
+              rssiList = rssiInfoMap(key)._1
+              // 当前key的isConnected false, 但是有一次是true了
+              if(isConnected == false && rssiInfoMap(key)._3 == true){
+                isConnected = true
+              }
             }
 
             rssiList += rssi
-            visitorMap += (sceneId  + Common.CTRL_A + userMac + Common.CTRL_A + minuteTime -> (rssiList,appList))
+            rssiInfoMap += (sceneId  + Common.CTRL_A + userMac + Common.CTRL_A + minuteTime -> (rssiList, appList, isConnected))
           }
         })
       }
     }
-
-    visitorMap
+//    println("rssiInfoMap: " + rssiInfoMap.size)
+    rssiInfoMap
   }
 
   /**
@@ -67,9 +83,9 @@ object ShopUnitFuncs {
     *
     * @return
     */
-  def filterBusinessVisitor(partition: Iterator[(String, (ArrayBuffer[Int],ArrayBuffer[Int]))]):Iterator[(String, (ArrayBuffer[Int],ArrayBuffer[Int]))] = {
+  def filterBusinessVisitor(partition: Iterator[(String, (ArrayBuffer[Int],ArrayBuffer[Int], Boolean))]):Iterator[(String, (ArrayBuffer[Int],ArrayBuffer[Int], Boolean))] = {
 
-    val recordList = ListBuffer[(String, ( ArrayBuffer[Int],ArrayBuffer[Int]))]()
+    val recordList = ListBuffer[(String, ( ArrayBuffer[Int],ArrayBuffer[Int], Boolean))]()
 
     partition.foreach(record => {
 
@@ -88,11 +104,14 @@ object ShopUnitFuncs {
           val openMinute = date + CommonConf.businessHoursMap(sceneId)._1 * Common.MINUTE_FORMATTER
           val closeMinute = (date + CommonConf.businessHoursMap(sceneId)._2 * Common.MINUTE_FORMATTER) - 1
           isFlag = minuteTime >= openMinute && minuteTime <= closeMinute
+//          println("isFlag: " + isFlag)
         } else {
+//          println("CommonConf.businessHoursMap.contains(sceneId) == false")
           isFlag = true
         }
 
         if(CommonConf.machineSet.contains(mac.toLowerCase())) {
+//          println("CommonConf.machineSet.contains(mac.toLowerCase()) == true")
           isFlag = false
         }
 
@@ -102,10 +121,11 @@ object ShopUnitFuncs {
       }
     })
 
+//    println("recordList: " + recordList.size)
     recordList.toIterator
   }
 
-  def buildVisitor(iterator: Iterator[(String, (ArrayBuffer[Int],ArrayBuffer[Int]))]): Iterator[(String, Array[Byte])] = {
+  def buildVisitor(iterator: Iterator[(String, (ArrayBuffer[Int],ArrayBuffer[Int], Boolean))]): Iterator[(String, Array[Byte])] = {
 
     val reList = ListBuffer[(String, Array[Byte])]()
 

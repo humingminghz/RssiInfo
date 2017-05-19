@@ -13,17 +13,17 @@ enum StubType {
 }
 
 message RssiItem {
-  required string id_data = 1;
+  required string id_data = 1; // 终端mac
   required IdType id_type = 2;
-  required int32  rssi = 3;
-  optional bool connected = 4;
+  required int32  rssi = 3; // 信号强度
+  optional bool connected = 4; // 终端是否链接
 }
 
 message RssiInfo {
-  required string id_data = 1;
+  required string id_data = 1; // AP mac
   required IdType id_type = 2;
   required StubType stub_type = 3;
-  required int64 timestamp = 4;
+  required int64 timestamp = 4;  // 数据时间戳
   repeated RssiItem items = 5;
-  required int64 scene_id = 6;
+  required int64 scene_id = 6; // 场景ID
 }
