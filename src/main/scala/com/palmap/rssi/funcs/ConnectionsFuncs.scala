@@ -38,14 +38,12 @@ object ConnectionsFuncs {
             .append(Common.MONGO_OPTION_ADD_TO_SET, new BasicDBObject(Common.MONGO_SHOP_CONNECTIONS_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, record._2)))
 
           col.update(queryBasic, updateBasic, upsert = true) // 更新
-
       })})
 
     }catch {
       case NonFatal(e) => println("Non Fatal Error happen, continue: " + e.printStackTrace())
       case e: InterruptedException => println("InterruptedException: " + e.printStackTrace())
     }
-
 
   }
 
@@ -58,19 +56,19 @@ object ConnectionsFuncs {
   def calConnections(partition :Iterator[(String, (ArrayBuffer[Int],ArrayBuffer[Int], Boolean))]) : Iterator[(String, scala.collection.mutable.Set[String])] = {
     val resultList = ListBuffer[(String, scala.collection.mutable.Set[String])]()
 
-      partition.foreach(record => {
-        val keys = record._1.split(Common.CTRL_A, -1)
-        val sceneId = keys(0).toLong
-        val mac = keys(1)
-        val timestamp = keys(2).toLong
+    partition.foreach(record => {
+      val keys = record._1.split(Common.CTRL_A, -1)
+      val sceneId = keys(0).toLong
+      val mac = keys(1)
+      val timestamp = keys(2).toLong
 
-        if(sceneId == Common.SCENE_ID_HUAWEI && record._2._3){ // 场景为华为 并且connected是true
-          val macs = scala.collection.mutable.Set[String]()
-          macs += mac.toUpperCase
+      if(sceneId == Common.SCENE_ID_HUAWEI && record._2._3){ // 场景为华为 并且connected是true
+        val macs = scala.collection.mutable.Set[String]()
+        macs += mac.toUpperCase
 
-          resultList += ((sceneId + Common.CTRL_A + timestamp, macs)) // 组成返回值
-        }
-      })
+        resultList += ((sceneId + Common.CTRL_A + timestamp, macs)) // 组成返回值
+      }
+    })
 
     resultList.toIterator
   }

@@ -1,5 +1,4 @@
 package com.palmap.rssi.statistic
-import java.util.Date
 
 import com.palmap.rssi.common.{Common, GeneralMethods}
 import com.palmap.rssi.funcs._
