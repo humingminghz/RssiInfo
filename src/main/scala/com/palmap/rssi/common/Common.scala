@@ -93,7 +93,7 @@ object Common {
     val MONGO_SHOP_REAL_TIME_HOUR_IS_CUSTOMER = "isCustomer"
     val MONGO_SHOP_REAL_TIME_HOUR_MACS = "macs"
 
-    val MONGO_SHOP_CONNECTIONS = "shop_connections"
+    val MONGO_COLLECTION_SHOP_CONNECTIONS = "shop_connections"
     val MONGO_SHOP_CONNECTIONS_SCENE_ID = "sceneId"
     val MONGO_SHOP_CONNECTIONS_TIME = "time"
     val MONGO_SHOP_CONNECTIONS_IS_CUSTOMER = "isCustomer"

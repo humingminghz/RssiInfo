@@ -21,7 +21,7 @@ object ConnectionsFuncs {
    def saveConnections(rdd : RDD[(String, scala.collection.mutable.Set[String])]) : Unit = {
     try{
       rdd.foreachPartition( partition => {
-        val col = MongoFactory.getDBCollection(Common.MONGO_SHOP_CONNECTIONS)
+        val col = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_CONNECTIONS)
 
         partition.foreach(record => {
           val keys = record._1.split(Common.CTRL_A, -1) // 分割key
