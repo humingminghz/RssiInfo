@@ -74,7 +74,6 @@ object ShopUnitFuncs {
         })
       }
     }
-//    println("rssiInfoMap: " + rssiInfoMap.size)
     rssiInfoMap
   }
 
@@ -104,14 +103,11 @@ object ShopUnitFuncs {
           val openMinute = date + CommonConf.businessHoursMap(sceneId)._1 * Common.MINUTE_FORMATTER
           val closeMinute = (date + CommonConf.businessHoursMap(sceneId)._2 * Common.MINUTE_FORMATTER) - 1
           isFlag = minuteTime >= openMinute && minuteTime <= closeMinute
-//          println("isFlag: " + isFlag)
         } else {
-//          println("CommonConf.businessHoursMap.contains(sceneId) == false")
           isFlag = true
         }
 
         if(CommonConf.machineSet.contains(mac.toLowerCase())) {
-//          println("CommonConf.machineSet.contains(mac.toLowerCase()) == true")
           isFlag = false
         }
 

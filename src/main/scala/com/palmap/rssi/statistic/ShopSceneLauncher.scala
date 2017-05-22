@@ -58,20 +58,21 @@ object ShopSceneLauncher {
       .mapPartitions(ShopUnitFuncs.buildVisitor)
       .filter(!_._2.isEmpty).cache()
     // .filter(ShopUnitFuncs.machineMacFilter)   mac黑名单过滤提前到 ShopUnitFuncs.rssiInfo 中， filter更改为Visitor不为空
-//    preVisitorRdd.foreachRDD(rdd => {
-//      rdd.map(x => println("x._1: " + x._1)).count()
-//      rdd
-//    })
-//    preVisitorRdd.filter(record => record._1.contains(Common.SCENE_ID_HUAWEI.toString) && (record._2._3 == true))
-//      .foreachRDD(rdd => ConnectionsFuncs.saveConnections _) // 将华为的connection 信息存到MongoDB
 
-    preVisitorRdd.foreachRDD( rdd => rdd.foreachPartition( x => x.foreach(x => println(x))))
-    preVisitorRdd.foreachRDD( rdd => ConnectionsFuncs.saveConnections _) // 保存至mongo  目前只算华为id 以及connected是true的
+//    preVisitorRdd.foreachRDD( rdd => ConnectionsFuncs.calConnections(rdd)) // 保存至mongo  目前只算华为id 以及connected是true的
 
-    preVisitorRdd.count().map("process " + _ + " data: saved data to shop Connection " + new Date()).print()
 
+    val connectionsRdd = preVisitorRdd
+      .mapPartitions(ConnectionsFuncs.calConnections)
+      .reduceByKey((record, nextRecord) => record ++ nextRecord) // 将同一个 sceneId + timeStamp 的value合并
+      .cache()
 
     preVisitorRdd.foreachRDD(_.unpersist(false))
+
+    connectionsRdd.foreachRDD( ConnectionsFuncs.saveConnections _)
+    connectionsRdd.count().map("process " + _ + " data: saved data to shop Connection " + new Date()).print()
+
+    connectionsRdd.foreachRDD(_.unpersist(false))
 
     //history
     visitorRdd.foreachRDD(HistoryFuncs.saveHistory _)
