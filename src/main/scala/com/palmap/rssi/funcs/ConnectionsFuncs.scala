@@ -62,13 +62,13 @@ object ConnectionsFuncs {
         val keys = record._1.split(Common.CTRL_A, -1)
         val sceneId = keys(0).toLong
         val mac = keys(1)
-        val timeStamp = keys(2).toLong
+        val timestamp = keys(2).toLong
 
         if(sceneId == Common.SCENE_ID_HUAWEI && record._2._3){ // 场景为华为 并且connected是true
           val macs = scala.collection.mutable.Set[String]()
           macs += mac.toUpperCase
 
-          resultList += ((sceneId + Common.CTRL_A + timeStamp, macs)) // 组成返回值
+          resultList += ((sceneId + Common.CTRL_A + timestamp, macs)) // 组成返回值
         }
       })
 

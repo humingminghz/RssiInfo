@@ -63,7 +63,7 @@ object ShopUnitFuncs {
             if (rssiInfoMap.contains(key)) {
               rssiList = rssiInfoMap(key)._1
               // 当前key的isConnected false, 但是有一次是true了
-              if(isConnected == false && rssiInfoMap(key)._3 == true){
+              if(!isConnected && rssiInfoMap(key)._3){
                 isConnected = true
               }
             }
@@ -80,7 +80,7 @@ object ShopUnitFuncs {
   /**
     * 营业时间过滤
     *
-    * @return
+    * @return Iterator[(sceneId + mac + timestamp, (rssiList,apList, isConnected))]
     */
   def filterBusinessVisitor(partition: Iterator[(String, (ArrayBuffer[Int],ArrayBuffer[Int], Boolean))]):Iterator[(String, (ArrayBuffer[Int],ArrayBuffer[Int], Boolean))] = {
 

@@ -65,7 +65,7 @@ object ShopSceneLauncher {
     preVisitorRdd.foreachRDD(_.unpersist(false))
 
     connectionsRdd.foreachRDD(ConnectionsFuncs.saveConnections _)
-    connectionsRdd.count().map( x => s"process ${x} data: saved data to shop Connection ${System.currentTimeMillis()}").print()
+    connectionsRdd.count().map(x => s"process ${x} data: saved data to shop Connection ${System.currentTimeMillis()}").print()
 
     connectionsRdd.foreachRDD(_.unpersist(false))
 
@@ -87,7 +87,7 @@ object ShopSceneLauncher {
     realTimeRdd.foreachRDD(RealTimeFuncs.saveRealTime _)
     realTimeRdd.count().map(x => s"process ${x} data; save data to realTime. ${System.currentTimeMillis()}").print
 
-    realTimeRdd.foreachRDD(_.unpersist())
+    realTimeRdd.foreachRDD(_.unpersist(false))
 
     ssc.start()
     ssc.awaitTermination()
