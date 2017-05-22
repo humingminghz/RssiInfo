@@ -117,7 +117,6 @@ object ShopUnitFuncs {
       }
     })
 
-//    println("recordList: " + recordList.size)
     recordList.toIterator
   }
 

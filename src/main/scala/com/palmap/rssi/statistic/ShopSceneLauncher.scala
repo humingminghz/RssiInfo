@@ -40,7 +40,7 @@ object ShopSceneLauncher {
       Map[String, String](Common.KAFKA_METADATA_BROKER -> broker_list, Common.SPARK_GROUP_ID -> group_id)
     val messagesRdd =
       KafkaUtils.createDirectStream[String, Array[Byte], StringDecoder, DefaultDecoder](ssc, kafkaParams, Set(topics))
-    messagesRdd.count().map(x => "Received " + x + " kafka events.").print()
+    messagesRdd.count().map(x => s"Received ${x} kafka events. ${System.currentTimeMillis()}").print()
 
     val preVisitorRdd = messagesRdd.map(_._2)
       .flatMap(ShopUnitFuncs.rssiInfo)
@@ -52,15 +52,10 @@ object ShopSceneLauncher {
           (record._1 ++ nextRecord._1,  record._2 ++ nextRecord._2, false)
         } }).cache()
 
-    preVisitorRdd.count().map("preVisitorRdd: " + _).print()
-
     val visitorRdd = preVisitorRdd
       .mapPartitions(ShopUnitFuncs.buildVisitor)
       .filter(!_._2.isEmpty).cache()
     // .filter(ShopUnitFuncs.machineMacFilter)   mac黑名单过滤提前到 ShopUnitFuncs.rssiInfo 中， filter更改为Visitor不为空
-
-//    preVisitorRdd.foreachRDD( rdd => ConnectionsFuncs.calConnections(rdd)) // 保存至mongo  目前只算华为id 以及connected是true的
-
 
     val connectionsRdd = preVisitorRdd
       .mapPartitions(ConnectionsFuncs.calConnections)
@@ -69,14 +64,14 @@ object ShopSceneLauncher {
 
     preVisitorRdd.foreachRDD(_.unpersist(false))
 
-    connectionsRdd.foreachRDD( ConnectionsFuncs.saveConnections _)
-    connectionsRdd.count().map("process " + _ + " data: saved data to shop Connection " + new Date()).print()
+    connectionsRdd.foreachRDD(ConnectionsFuncs.saveConnections _)
+    connectionsRdd.count().map( x => s"process ${x} data: saved data to shop Connection ${System.currentTimeMillis()}").print()
 
     connectionsRdd.foreachRDD(_.unpersist(false))
 
     //history
     visitorRdd.foreachRDD(HistoryFuncs.saveHistory _)
-    visitorRdd.count().map("process " + _ + " data; save data to History. " + new Date()).print
+    visitorRdd.count().map(x => s"process ${x} data; save data to History. ${System.currentTimeMillis()}").print
 
 
     //Visited  calcDwellIsCustomer
@@ -88,9 +83,9 @@ object ShopSceneLauncher {
 
     visitorRdd.foreachRDD(_.unpersist(false)) // realTimeRdd 计算后将visitorRdd从缓存中释放
 
-    realTimeRdd.count().map("process " +_ + " data; save data to calVisitorDwell. " + new Date()).print
+    realTimeRdd.count().map(x => s"process ${x} data; save data to calVisitorDwell. ${System.currentTimeMillis()}").print
     realTimeRdd.foreachRDD(RealTimeFuncs.saveRealTime _)
-    realTimeRdd.count().map("process " +_ + " data; save data to realTime. " + new Date()).print
+    realTimeRdd.count().map(x => s"process ${x} data; save data to realTime. ${System.currentTimeMillis()}").print
 
     realTimeRdd.foreachRDD(_.unpersist())
 
