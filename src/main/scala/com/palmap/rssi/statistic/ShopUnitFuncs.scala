@@ -32,7 +32,7 @@ object ShopUnitFuncs {
     val timeStamp = builder.getTimestamp
 
     if (builder.hasSceneId && builder.hasTimestamp && builder.hasIdData
-      && builder.getIdType == IdType.MAC && builder.getStubType == StubType.AP ) { // 必要字段检查
+      && builder.getIdType == IdType.MAC && builder.getStubType == StubType.AP) { // 必要字段检查
 
       val sceneId = builder.getSceneId
       val sdf = new SimpleDateFormat(Common.NOW_MINUTE_FORMAT)

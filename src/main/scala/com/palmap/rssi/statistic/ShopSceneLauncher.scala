@@ -70,7 +70,7 @@ object ShopSceneLauncher {
 
     //history
     visitorRdd.foreachRDD(HistoryFuncs.saveHistory _)
-    visitorRdd.count().map(x => s"process ${x} data; save data to History. ${System.currentTimeMillis()}").print
+    visitorRdd.count().map(x => s"process ${x} data; save data to History. ${System.currentTimeMillis()}").print()
 
 
     //Visited  calcDwellIsCustomer
@@ -82,9 +82,9 @@ object ShopSceneLauncher {
 
     visitorRdd.foreachRDD(_.unpersist(false)) // realTimeRdd 计算后将visitorRdd从缓存中释放
 
-    realTimeRdd.count().map(x => s"process ${x} data; save data to calVisitorDwell. ${System.currentTimeMillis()}").print
+    realTimeRdd.count().map(x => s"process ${x} data; save data to calVisitorDwell. ${System.currentTimeMillis()}").print()
     realTimeRdd.foreachRDD(RealTimeFuncs.saveRealTime _)
-    realTimeRdd.count().map(x => s"process ${x} data; save data to realTime. ${System.currentTimeMillis()}").print
+    realTimeRdd.count().map(x => s"process ${x} data; save data to realTime. ${System.currentTimeMillis()}").print()
 
     realTimeRdd.foreachRDD(_.unpersist(false))
 
