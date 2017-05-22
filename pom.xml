@@ -111,12 +111,6 @@
             <version>1.0.4</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.typesafe.scala-logging/scala-logging-slf4j_2.10 -->
-        <dependency>
-            <groupId>com.typesafe.scala-logging</groupId>
-            <artifactId>scala-logging-slf4j_2.10</artifactId>
-            <version>2.1.2</version>
-        </dependency>
-
 
     </dependencies>
 
