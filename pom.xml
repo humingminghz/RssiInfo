@@ -110,7 +110,6 @@
             <artifactId>scala-xml_2.11</artifactId>
             <version>1.0.4</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.typesafe.scala-logging/scala-logging-slf4j_2.10 -->
 
     </dependencies>
 
