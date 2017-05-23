@@ -6,8 +6,7 @@ import java.text.SimpleDateFormat
 
 import scala.collection.mutable
 import scala.io.Source
-
-import com.mongodb.BasicDBObject
+import com.mongodb.casbah.commons.MongoDBObject
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.json.JSONArray
@@ -101,8 +100,7 @@ object ConfInfoSet {
   def updateBusinessHourMap(sceneId: Int): Unit = {
 
     val staticInfoColl = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_STATIC_INFO)
-    val query = new BasicDBObject()
-    query.put(Common.MONGO_STATIC_INFO_SHOP_SCENE_ID, sceneId)
+    val query = MongoDBObject(Common.MONGO_STATIC_INFO_SHOP_SCENE_ID -> sceneId)
     val staticInfoList = staticInfoColl.find(query)
 
     if (staticInfoList.nonEmpty) {

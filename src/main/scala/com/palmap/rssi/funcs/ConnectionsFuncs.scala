@@ -1,6 +1,6 @@
 package com.palmap.rssi.funcs
 
-import com.mongodb.BasicDBObject
+import com.mongodb.casbah.commons.MongoDBObject
 import com.palmap.rssi.common.{Common, MongoFactory}
 import org.apache.spark.rdd.RDD
 
@@ -28,14 +28,11 @@ object ConnectionsFuncs {
           val sceneId = keys(0)
           val timestamp = keys(1).toLong
 
-          val queryBasic = new BasicDBObject()
-            .append(Common.MONGO_SHOP_CONNECTIONS_SCENE_ID, sceneId)
-            .append(Common.MONGO_SHOP_CONNECTIONS_TIME, timestamp) // 组成查询语句 sceneId + timeStamp 为一类数据
-
-          val updateBasic = new BasicDBObject() // 组成更新语句
-            .append(Common.MONGO_OPTION_SET, new BasicDBObject(Common.MONGO_SHOP_CONNECTIONS_IS_CUSTOMER, false)) // 暂时isCustomer为false 未使用
-            .append(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_SHOP_CONNECTIONS_MAC_SUM, record._2.size))
-            .append(Common.MONGO_OPTION_ADD_TO_SET, new BasicDBObject(Common.MONGO_SHOP_CONNECTIONS_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, record._2)))
+          val queryBasic = MongoDBObject(Common.MONGO_SHOP_CONNECTIONS_SCENE_ID -> sceneId,
+            Common.MONGO_SHOP_CONNECTIONS_TIME -> timestamp)
+          val updateBasic = MongoDBObject(Common.MONGO_OPTION_SET -> MongoDBObject(Common.MONGO_SHOP_CONNECTIONS_IS_CUSTOMER -> false),
+            Common.MONGO_OPTION_INC -> MongoDBObject(Common.MONGO_SHOP_CONNECTIONS_MAC_SUM -> record._2.size),
+            Common.MONGO_OPTION_ADD_TO_SET -> MongoDBObject(Common.MONGO_SHOP_CONNECTIONS_MACS -> MongoDBObject(Common.MONGO_OPTION_EACH -> record._2)))
 
           col.update(queryBasic, updateBasic, upsert = true) // 更新
       })})

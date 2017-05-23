@@ -1,13 +1,9 @@
 package com.palmap.rssi.funcs
 
-import java.text.SimpleDateFormat
-import java.util.Date
-
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
-
-import com.mongodb.BasicDBObject
-import com.palmap.rssi.common.{Common, GeneralMethods, MongoFactory}
+import com.mongodb.casbah.commons.MongoDBObject
+import com.palmap.rssi.common.{Common, DateUtil, GeneralMethods, MongoFactory}
 import com.palmap.rssi.message.ShopStore.Visitor
 import org.apache.spark.rdd.RDD
 
@@ -45,7 +41,6 @@ object RealTimeFuncs {
     rdd.foreachPartition(partition => {
 
       try {
-
         val realTimeCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_REAL_TIME)
         val realTimeHourCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_REAL_TIME_HOUR)
 
@@ -57,35 +52,26 @@ object RealTimeFuncs {
           val minuteTime = ele(2).toLong
           val macs = record._2
 
-          val queryBasic = new BasicDBObject()
-            .append(Common.MONGO_SHOP_REAL_TIME_TIME, minuteTime)
-            .append(Common.MONGO_SHOP_REAL_TIME_SCENE_ID, sceneId)
-            .append(Common.MONGO_SHOP_REAL_TIME_IS_CUSTOMER, isCustomer)
-
-          val updateBasic = new BasicDBObject()
-            .append(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_SHOP_REAL_TIME_MAC_SUM, macs.size))
-            .append(Common.MONGO_OPTION_ADD_TO_SET,
-              new BasicDBObject(Common.MONGO_SHOP_REAL_TIME_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macs)))
+          val queryBasic = MongoDBObject(Common.MONGO_SHOP_REAL_TIME_TIME -> minuteTime,
+            Common.MONGO_SHOP_REAL_TIME_SCENE_ID -> sceneId,
+            Common.MONGO_SHOP_REAL_TIME_IS_CUSTOMER -> isCustomer)
+          val updateBasic = MongoDBObject(Common.MONGO_OPTION_INC -> MongoDBObject(Common.MONGO_SHOP_REAL_TIME_MAC_SUM -> macs.size),
+            Common.MONGO_OPTION_ADD_TO_SET -> MongoDBObject(Common.MONGO_SHOP_REAL_TIME_MACS -> MongoDBObject(Common.MONGO_OPTION_EACH -> macs)))
 
           realTimeCollection.update(queryBasic, updateBasic, upsert = true)
 
-          val sdf = new SimpleDateFormat(Common.NOW_HOUR_FORMAT)
-          val hour = sdf.parse(sdf.format(new Date(minuteTime))).getTime
-
-          val queryHourBasic = new BasicDBObject()
-            .append(Common.MONGO_SHOP_REAL_TIME_HOUR, hour)
-            .append(Common.MONGO_SHOP_REAL_TIME_HOUR_SCENE_ID, sceneId)
-            .append(Common.MONGO_SHOP_REAL_TIME_HOUR_IS_CUSTOMER, isCustomer)
-
-          val updateMacBasic = new BasicDBObject()
-            .append(Common.MONGO_OPTION_ADD_TO_SET, new BasicDBObject(Common.MONGO_SHOP_REAL_TIME_HOUR_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macs)))
+          val hour = DateUtil.getHourTimeStamp(minuteTime)
+          val queryHourBasic = MongoDBObject(Common.MONGO_SHOP_REAL_TIME_HOUR -> hour,
+            Common.MONGO_SHOP_REAL_TIME_HOUR_SCENE_ID -> sceneId,
+            Common.MONGO_SHOP_REAL_TIME_HOUR_IS_CUSTOMER -> isCustomer)
+          val updateMacBasic = MongoDBObject(Common.MONGO_OPTION_ADD_TO_SET ->
+            MongoDBObject(Common.MONGO_SHOP_REAL_TIME_HOUR_MACS -> MongoDBObject(Common.MONGO_OPTION_EACH -> macs)))
 
           realTimeHourCollection.update(queryHourBasic, updateMacBasic, upsert = true)
         })
       } catch {
         case e: Exception => e.printStackTrace()
       }
-
     })
   }
 
@@ -96,9 +82,9 @@ object RealTimeFuncs {
       partition => {
 
         try {
-
           val realTimeCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_REAL_TIME)
           val realTimeHourCollection = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_REAL_TIME_HOUR)
+
           partition.foreach(record => {
 
             val arr = record._1.split(Common.CTRL_A, -1)
@@ -106,28 +92,21 @@ object RealTimeFuncs {
             val isCustomer = arr(1).toBoolean
             val minTime = arr(2).toLong
             val macList = record._2
+            val hour = DateUtil.getHourTimeStamp(minTime)
 
-            val hourFormat = new SimpleDateFormat(Common.NOW_HOUR_FORMAT)
-            val hour = hourFormat.parse(hourFormat.format(minTime)).getTime
-
-            val query = new BasicDBObject(Common.MONGO_SHOP_REAL_TIME_TIME, minTime)
-            query.append(Common.MONGO_SHOP_REAL_TIME_SCENE_ID, sceneId)
-            query.append(Common.MONGO_SHOP_REAL_TIME_IS_CUSTOMER, isCustomer)
-
-            val update = new BasicDBObject()
-            update.append(Common.MONGO_OPTION_INC, new BasicDBObject(Common.MONGO_SHOP_REAL_TIME_MAC_SUM, macList.size))
-            update.append(Common.MONGO_OPTION_ADD_TO_SET,
-              new BasicDBObject(Common.MONGO_SHOP_REAL_TIME_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
+            val query = MongoDBObject(Common.MONGO_SHOP_REAL_TIME_TIME -> minTime,
+              Common.MONGO_SHOP_REAL_TIME_SCENE_ID -> sceneId,
+              Common.MONGO_SHOP_REAL_TIME_IS_CUSTOMER -> isCustomer)
+            val update = MongoDBObject(Common.MONGO_OPTION_INC -> MongoDBObject(Common.MONGO_SHOP_REAL_TIME_MAC_SUM -> macList.size),
+              Common.MONGO_OPTION_ADD_TO_SET -> MongoDBObject(Common.MONGO_SHOP_REAL_TIME_MACS -> MongoDBObject(Common.MONGO_OPTION_EACH -> macList)))
 
             realTimeCollection.update(query, update, upsert = true)
 
-            val hourQuery = new BasicDBObject(Common.MONGO_SHOP_REAL_TIME_HOUR, hour)
-            hourQuery.append(Common.MONGO_SHOP_REAL_TIME_HOUR_SCENE_ID, sceneId)
-            hourQuery.append(Common.MONGO_SHOP_REAL_TIME_HOUR_IS_CUSTOMER, isCustomer)
-
-            val hourUpdate = new BasicDBObject
-            hourUpdate.append(Common.MONGO_OPTION_ADD_TO_SET,
-              new BasicDBObject(Common.MONGO_SHOP_REAL_TIME_HOUR_MACS, new BasicDBObject(Common.MONGO_OPTION_EACH, macList)))
+            val hourQuery = MongoDBObject(Common.MONGO_SHOP_REAL_TIME_HOUR -> hour,
+              Common.MONGO_SHOP_REAL_TIME_HOUR_SCENE_ID -> sceneId,
+              Common.MONGO_SHOP_REAL_TIME_HOUR_IS_CUSTOMER -> isCustomer)
+            val hourUpdate = MongoDBObject(Common.MONGO_OPTION_ADD_TO_SET ->
+              MongoDBObject(Common.MONGO_SHOP_REAL_TIME_HOUR_MACS -> MongoDBObject(Common.MONGO_OPTION_EACH -> macList)))
 
             realTimeHourCollection.update(hourQuery, hourUpdate, upsert = true)
           })

@@ -105,6 +105,6 @@ object Common {
     val MONGO_STATIC_INFO_SHOP_OPEN_MINUTE = "openMinute"
     val MONGO_STATIC_INFO_SHOP_CLOSE_MINUTE = "closeMinute"
 
-    val SCENE_ID_HUAWEI = 13519  // 华为的sceneId 统计每分钟连接数用
+    val SCENE_ID_HUAWEI = 13518  // 华为的sceneId 统计每分钟连接数用
 
 }

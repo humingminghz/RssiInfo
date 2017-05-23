@@ -1,16 +1,14 @@
 package com.palmap.rssi.statistic
 
-import java.text.SimpleDateFormat
-import java.util.Date
-
 import com.google.protobuf.ByteString
-import com.mongodb.BasicDBObject
-import com.palmap.rssi.common.{CommonConf, Common, GeneralMethods, MongoFactory}
+import com.mongodb.casbah.commons.MongoDBObject
+import com.palmap.rssi.common._
 import com.palmap.rssi.message.FrostEvent.{IdType, RssiInfo, StubType}
 import com.palmap.rssi.message.ShopStore.Visitor
+
 import scala.collection.JavaConversions._
 import scala.collection.mutable
-import scala.collection.mutable.{ListBuffer, ArrayBuffer}
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 object ShopUnitFuncs {
 
@@ -35,11 +33,8 @@ object ShopUnitFuncs {
       && builder.getIdType == IdType.MAC && builder.getStubType == StubType.AP) { // 必要字段检查
 
       val sceneId = builder.getSceneId
-      val sdf = new SimpleDateFormat(Common.NOW_MINUTE_FORMAT)
-      val dateStr = sdf.format(new Date(timeStamp))
-      val minuteTime = sdf.parse(dateStr).getTime
-      val currentDate = new Date()
-      val currentTime = sdf.parse(sdf.format(currentDate)).getTime
+      val minuteTime = DateUtil.getMinuteTimeStamp(timeStamp)
+      val currentTime = DateUtil.getMinuteTimeStamp(System.currentTimeMillis())
 
       //过滤本批次要处理的数据
       if (minuteTime == (currentTime - Common.MINUTE_FORMATTER)) {
@@ -98,8 +93,7 @@ object ShopUnitFuncs {
         var isFlag = false
 
         if (CommonConf.businessHoursMap.contains(sceneId)) {
-          val todayDateFormat = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
-          val date = todayDateFormat.parse(todayDateFormat.format(minuteTime)).getTime
+          val date = DateUtil.getDayTimeStamp(minuteTime)
           val openMinute = date + CommonConf.businessHoursMap(sceneId)._1 * Common.MINUTE_FORMATTER
           val closeMinute = (date + CommonConf.businessHoursMap(sceneId)._2 * Common.MINUTE_FORMATTER) - 1
           isFlag = minuteTime >= openMinute && minuteTime <= closeMinute
@@ -182,17 +176,14 @@ object ShopUnitFuncs {
       val visitor = Visitor.newBuilder().clear().mergeFrom(record._2, 0, record._2.length)
       val userMac = new String(visitor.getPhoneMac.toByteArray)
       val sceneId = visitor.getSceneId
+      val date = DateUtil.getDayTimeStamp(visitor.getTimeStamp)
 
-      val todayDateFormat = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
-      val todayDate = todayDateFormat.format(new Date(visitor.getTimeStamp))
-      val date = todayDateFormat.parse(todayDate).getTime
+      val query = MongoDBObject(Common.MONGO_SHOP_VISITED_DATE -> date,
+        Common.MONGO_SHOP_VISITED_SCENE_ID -> sceneId,
+        Common.MONGO_SHOP_VISITED_MAC -> userMac)
 
-      val query = new BasicDBObject
-      query.put(Common.MONGO_SHOP_VISITED_DATE, date)
-      query.put(Common.MONGO_SHOP_VISITED_SCENE_ID, sceneId)
-      query.put(Common.MONGO_SHOP_VISITED_MAC, userMac)
-
-      val queryCol = new BasicDBObject(Common.MONGO_SHOP_VISITED_IS_CUSTOMER, 1).append(Common.MONGO_OPTION_ID, 0)
+      val queryCol = MongoDBObject(Common.MONGO_SHOP_VISITED_IS_CUSTOMER -> 1,
+        Common.MONGO_OPTION_ID -> 0)
 
       var isCustomer = false
       val result = visitedCollection.find(query, queryCol).toList
