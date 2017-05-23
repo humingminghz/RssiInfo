@@ -27,7 +27,7 @@ object ShopSceneLauncher {
     System.setProperty("spark.storage.memoryFraction", "0.4")
     System.setProperty("spark.shuffle.io.preferDirectBufs", "false")
 
-    val sparkConf = new SparkConf().setAppName("frost-launcher").setMaster("local[*]")
+    val sparkConf = new SparkConf().setAppName("frost-launcher")
     sparkConf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     sparkConf.set("spark.shuffle.consolidateFiles", "true") // 开启shuffle block file的合并
     sparkConf.registerKryoClasses(Array(classOf[Visitor], classOf[Visitor.Builder]))
