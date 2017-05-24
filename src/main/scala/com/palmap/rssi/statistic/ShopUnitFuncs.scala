@@ -33,8 +33,8 @@ object ShopUnitFuncs {
       && builder.getIdType == IdType.MAC && builder.getStubType == StubType.AP) { // 必要字段检查
 
       val sceneId = builder.getSceneId
-      val minuteTime = DateUtil.getMinuteTimeStamp(timeStamp)
-      val currentTime = DateUtil.getMinuteTimeStamp(System.currentTimeMillis())
+      val minuteTime = DateUtil.getMinuteTimestamp(timeStamp)
+      val currentTime = DateUtil.getMinuteTimestamp(System.currentTimeMillis())
 
       //过滤本批次要处理的数据
       if (minuteTime == (currentTime - Common.MINUTE_FORMATTER)) {
@@ -93,7 +93,7 @@ object ShopUnitFuncs {
         var isFlag = false
 
         if (CommonConf.businessHoursMap.contains(sceneId)) {
-          val date = DateUtil.getDayTimeStamp(minuteTime)
+          val date = DateUtil.getDayTimestamp(minuteTime)
           val openMinute = date + CommonConf.businessHoursMap(sceneId)._1 * Common.MINUTE_FORMATTER
           val closeMinute = (date + CommonConf.businessHoursMap(sceneId)._2 * Common.MINUTE_FORMATTER) - 1
           isFlag = minuteTime >= openMinute && minuteTime <= closeMinute
@@ -176,7 +176,7 @@ object ShopUnitFuncs {
       val visitor = Visitor.newBuilder().clear().mergeFrom(record._2, 0, record._2.length)
       val userMac = new String(visitor.getPhoneMac.toByteArray)
       val sceneId = visitor.getSceneId
-      val date = DateUtil.getDayTimeStamp(visitor.getTimeStamp)
+      val date = DateUtil.getDayTimestamp(visitor.getTimeStamp)
 
       val query = MongoDBObject(Common.MONGO_SHOP_VISITED_DATE -> date,
         Common.MONGO_SHOP_VISITED_SCENE_ID -> sceneId,

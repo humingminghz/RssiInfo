@@ -50,7 +50,7 @@ object VisitedFuncs {
 
         }
 
-        val dayTime = DateUtil.getDayTimeStamp(timestamp)
+        val dayTime = DateUtil.getDayTimestamp(timestamp)
 
         val realQuery = MongoDBObject(Common.MONGO_SHOP_REAL_TIME_SCENE_ID -> sceneId,
           Common.MONGO_SHOP_REAL_TIME_MACS -> mac,
@@ -90,7 +90,7 @@ object VisitedFuncs {
           if (CommonConf.sceneIdMap.contains(sceneId)) {
             val setDwell = CommonConf.sceneIdMap.getOrElse(sceneId, 5)
             isCustomer = dwellAgo + dwell > setDwell
-          } else if (sceneId == 10062) { //TODO: 10062是？ 特定SceneId修改成Common类的常量
+          } else if (sceneId == 10062) { // TODO: 10062是？ 特定SceneId修改成Common类的常量
             isCustomer = !phoneBrand.equals(Common.BRAND_UNKNOWN)
           } else {
             isCustomer = dwellAgo + dwell > 5
@@ -149,7 +149,7 @@ object VisitedFuncs {
           times = ret.get(Common.MONGO_SHOP_VISITED_TIMES).toString.toInt
         }
 
-        val date = DateUtil.getDayTimeStamp(visitor.getTimeStamp)
+        val date = DateUtil.getDayTimestamp(visitor.getTimeStamp)
 
         //save
         val query = MongoDBObject(Common.MONGO_SHOP_VISITED_DATE -> date,
@@ -215,7 +215,7 @@ object VisitedFuncs {
               times = ret.get(Common.MONGO_SHOP_VISITED_TIMES).toString.toInt
             }
 
-            val date = DateUtil.getDayTimeStamp(visitor.getTimeStamp)
+            val date = DateUtil.getDayTimestamp(visitor.getTimeStamp)
 
             //save
             val query = MongoDBObject(Common.MONGO_SHOP_VISITED_DATE -> date,

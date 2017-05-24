@@ -21,7 +21,7 @@ object HistoryFuncs {
           val sceneId = visitorBuilder.getSceneId
           val mac = new String(visitorBuilder.getPhoneMac.toByteArray)
           val minuteTime = visitorBuilder.getTimeStamp
-          var dayTime = DateUtil.getDayTimeStamp(minuteTime)
+          var dayTime = DateUtil.getDayTimestamp(minuteTime)
 
           val queryBasic = MongoDBObject(Common.MONGO_HISTORY_SHOP_SCENE_ID -> sceneId,
             Common.MONGO_HISTORY_SHOP_MAC -> mac)

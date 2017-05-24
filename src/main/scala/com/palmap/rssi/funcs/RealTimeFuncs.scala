@@ -60,7 +60,7 @@ object RealTimeFuncs {
 
           realTimeCollection.update(queryBasic, updateBasic, upsert = true)
 
-          val hour = DateUtil.getHourTimeStamp(minuteTime)
+          val hour = DateUtil.getHourTimestamp(minuteTime)
           val queryHourBasic = MongoDBObject(Common.MONGO_SHOP_REAL_TIME_HOUR -> hour,
             Common.MONGO_SHOP_REAL_TIME_HOUR_SCENE_ID -> sceneId,
             Common.MONGO_SHOP_REAL_TIME_HOUR_IS_CUSTOMER -> isCustomer)
@@ -92,7 +92,7 @@ object RealTimeFuncs {
             val isCustomer = arr(1).toBoolean
             val minTime = arr(2).toLong
             val macList = record._2
-            val hour = DateUtil.getHourTimeStamp(minTime)
+            val hour = DateUtil.getHourTimestamp(minTime)
 
             val query = MongoDBObject(Common.MONGO_SHOP_REAL_TIME_TIME -> minTime,
               Common.MONGO_SHOP_REAL_TIME_SCENE_ID -> sceneId,
