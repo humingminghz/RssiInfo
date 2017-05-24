@@ -25,7 +25,7 @@ object ConnectionsFuncs {
 
         partition.foreach(record => {
           val keys = record._1.split(Common.CTRL_A, -1) // 分割key
-          val sceneId = keys(0)
+          val sceneId = keys(0).toInt
           val timestamp = keys(1).toLong
 
           val queryBasic = MongoDBObject(Common.MONGO_SHOP_CONNECTIONS_SCENE_ID -> sceneId,
@@ -55,7 +55,7 @@ object ConnectionsFuncs {
 
     partition.foreach(record => {
       val keys = record._1.split(Common.CTRL_A, -1)
-      val sceneId = keys(0).toLong
+      val sceneId = keys(0).toInt
       val mac = keys(1)
       val timestamp = keys(2).toLong
 
