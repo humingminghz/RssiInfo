@@ -33,6 +33,7 @@ object HistoryFuncs {
 
           val retList = historyCollection.find(queryBasic, findBasic).toList
           var isDateExist = false
+
           if (retList.nonEmpty) {
             val record = retList.head
             if (! record.containsField(Common.MONGO_HISTORY_SHOP_FIRST_DATE)) {
@@ -51,7 +52,6 @@ object HistoryFuncs {
           }
 
           if (!isDateExist) {
-
             if (retList.isEmpty) {
               val firstUpdate = MongoDBObject(Common.MONGO_OPTION_SET -> MongoDBObject(Common.MONGO_HISTORY_SHOP_FIRST_DATE -> dayTime))
               historyCollection.update(queryBasic, firstUpdate, upsert = true)

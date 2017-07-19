@@ -5,7 +5,7 @@ import com.palmap.rssi.funcs._
 import com.palmap.rssi.message.ShopStore.Visitor
 import kafka.serializer.{DefaultDecoder, StringDecoder}
 import org.apache.log4j.{Level, Logger}
-import org.apache.spark.streaming.kafka.KafkaUtils
+import org.apache.spark.streaming.kafka.{HasOffsetRanges, KafkaUtils}
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.{SparkConf, SparkContext}
 
@@ -17,7 +17,7 @@ object ShopSceneLauncher {
 
   def main(args: Array[String]): Unit = {
 
-    Logger.getLogger("org").setLevel(Level.OFF)
+//    Logger.getLogger("org").setLevel(Level.OFF)
 
     val sparkRssiInfoXml = GeneralMethods.getConf(Common.SPARK_CONFIG)
     val broker_list = sparkRssiInfoXml(Common.KAFKA_METADATA_BROKER)
@@ -27,7 +27,7 @@ object ShopSceneLauncher {
     System.setProperty("spark.storage.memoryFraction", "0.4")
     System.setProperty("spark.shuffle.io.preferDirectBufs", "false")
 
-    val sparkConf = new SparkConf().setAppName("frost-launcher")
+    val sparkConf = new SparkConf().setAppName("frost-launcher").setMaster("local[*]")
     sparkConf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     sparkConf.set("spark.shuffle.consolidateFiles", "true") // 开启shuffle block file的合并
     sparkConf.registerKryoClasses(Array(classOf[Visitor], classOf[Visitor.Builder]))
@@ -39,7 +39,13 @@ object ShopSceneLauncher {
       Map[String, String](Common.KAFKA_METADATA_BROKER -> broker_list, Common.SPARK_GROUP_ID -> group_id)
     val messagesRdd =
       KafkaUtils.createDirectStream[String, Array[Byte], StringDecoder, DefaultDecoder](ssc, kafkaParams, Set(topics))
-    messagesRdd.count().map(x => s"Received ${x} kafka events. ${System.currentTimeMillis()}").print()
+    messagesRdd.count().map(x => s"Received $x kafka events. ${System.currentTimeMillis()}").print()
+
+    //TODO: 是否需要维护kafka的offset？ 在zookeeper内新建一个node
+    messagesRdd.foreachRDD(rdd =>{
+      val offsetRange = rdd.asInstanceOf[HasOffsetRanges].offsetRanges
+      offsetRange.foreach(x => println(s"rangeX: $x"))
+    })
 
     val preVisitorRdd = messagesRdd.map(_._2)
       .flatMap(ShopUnitFuncs.rssiInfo)
@@ -64,13 +70,13 @@ object ShopSceneLauncher {
     preVisitorRdd.foreachRDD(_.unpersist(false))
 
     connectionsRdd.foreachRDD(ConnectionsFuncs.saveConnections _)
-    connectionsRdd.count().map(x => s"process ${x} data: saved data to shop Connection ${System.currentTimeMillis()}").print()
+    connectionsRdd.count().map(x => s"process $x data: saved data to shop Connection ${System.currentTimeMillis()}").print()
 
     connectionsRdd.foreachRDD(_.unpersist(false))
 
     //history
     visitorRdd.foreachRDD(HistoryFuncs.saveHistory _)
-    visitorRdd.count().map(x => s"process ${x} data; save data to History. ${System.currentTimeMillis()}").print()
+    visitorRdd.count().map(x => s"process $x data; save data to History. ${System.currentTimeMillis()}").print()
 
 
     //Visited  calcDwellIsCustomer
@@ -82,9 +88,9 @@ object ShopSceneLauncher {
 
     visitorRdd.foreachRDD(_.unpersist(false)) // realTimeRdd 计算后将visitorRdd从缓存中释放
 
-    realTimeRdd.count().map(x => s"process ${x} data; save data to calVisitorDwell. ${System.currentTimeMillis()}").print()
+    realTimeRdd.count().map(x => s"process $x data; save data to calVisitorDwell. ${System.currentTimeMillis()}").print()
     realTimeRdd.foreachRDD(RealTimeFuncs.saveRealTime _)
-    realTimeRdd.count().map(x => s"process ${x} data; save data to realTime. ${System.currentTimeMillis()}").print()
+    realTimeRdd.count().map(x => s"process $x data; save data to realTime. ${System.currentTimeMillis()}").print()
 
     realTimeRdd.foreachRDD(_.unpersist(false))
 
