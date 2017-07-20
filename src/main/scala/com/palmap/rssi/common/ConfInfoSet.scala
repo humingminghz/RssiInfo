@@ -12,14 +12,17 @@ import org.apache.hadoop.fs.{FileSystem, Path}
 import org.json.JSONArray
 
 /**
-  * Created by lingling.dai on 2016/1/12.
+  * Created by Administrator
   */
 object ConfInfoSet {
 
   val todayFormat = new SimpleDateFormat(Common.TODAY_FIRST_TS_FORMAT)
   val xmlConf: mutable.Map[String, String] = GeneralMethods.getConf(Common.SPARK_CONFIG)
 
-  //get machine macs set
+  /**
+    * 程序启动时初始化机器黑名单
+    * @param fileName 黑名单文件路径
+    */
   def initMachineSet(fileName: String): Unit = {
     Source.fromFile(fileName).getLines()
       .foreach { line =>
@@ -28,7 +31,10 @@ object ConfInfoSet {
       }
   }
 
-  //update machine set
+  /**
+    * zookeeper中触发黑名单变更
+    *
+    */
   def updateMachineSet(): Unit = {
 
     println("before update machine set:" + CommonConf.machineSet.size)
@@ -37,7 +43,7 @@ object ConfInfoSet {
     val in = fileSystem.open(new Path(Common.MACHINE_SET_PATH))
     val bufferedReader = new BufferedReader(new InputStreamReader(in))
     var line = ""
-
+    // 从本地文件中读入
     while ( {
       line = bufferedReader.readLine()
       line != null
@@ -60,9 +66,12 @@ object ConfInfoSet {
 
   }
 
+  /**
+    * 从地图服务器读入场景Id
+    */
   def initSceneIdList(): Unit = {
 
-    val url = xmlConf(Common.SHOP_SCENE_IDS_URL)
+    val url = xmlConf(Common.SHOP_SCENE_IDS_URL) // 配置文件读取URL
 
     try {
 
@@ -70,6 +79,7 @@ object ConfInfoSet {
       val jsonList = new JSONArray(result)
       println("update sceneIdlist ")
 
+      // 添加至内存
       for (i <- 0 until jsonList.length()) {
         CommonConf.sceneIdlist += jsonList.getInt(i)
         print("   " + jsonList.getInt(i))
@@ -81,6 +91,9 @@ object ConfInfoSet {
     }
   }
 
+  /**
+    * 程序启动时初始化营业时间
+    */
   def initBusinessHoursMap(): Unit = {
 
     val businessHoursColl = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_STATIC_INFO)
@@ -97,8 +110,13 @@ object ConfInfoSet {
 
   }
 
+  /**
+    * zookeeper触发营业时间变更
+    * @param sceneId 场景ID
+    */
   def updateBusinessHourMap(sceneId: Int): Unit = {
 
+    // 从mongoDB中获取营业时间
     val staticInfoColl = MongoFactory.getDBCollection(Common.MONGO_COLLECTION_SHOP_STATIC_INFO)
     val query = MongoDBObject(Common.MONGO_STATIC_INFO_SHOP_SCENE_ID -> sceneId)
     val staticInfoList = staticInfoColl.find(query)
@@ -114,6 +132,11 @@ object ConfInfoSet {
 
   }
 
+  /**
+    * 从指定URL获取response结果
+    * @param get_url 目标URL
+    * @return Json字符串
+    */
   def sendGetData(get_url: String): String = {
 
     var getUrl: URL = null
@@ -121,7 +144,7 @@ object ConfInfoSet {
     var connection: HttpURLConnection = null
 
     try {
-
+      // 对URL获取response并返回
       getUrl = new URL(get_url)
       connection = getUrl.openConnection.asInstanceOf[HttpURLConnection]
       connection.addRequestProperty("Accept", "application/json")
@@ -151,6 +174,11 @@ object ConfInfoSet {
     }
   }
 
+  /**
+    * 根据connection 获取response
+    * @param connection HttpURLConnection
+    * @return Json字符串
+    */
   private def readStream(connection: HttpURLConnection): String = {
 
     val byteOut: Array[Byte] = new Array[Byte](10240)
@@ -168,6 +196,10 @@ object ConfInfoSet {
     new String(outSteam.toByteArray, "utf-8")
   }
 
+  /**
+    * 初始化手机黑名单
+    * @param fileName
+    */
   def initMachineBrandList(fileName: String): Unit = {
     Source.fromFile(fileName).getLines().foreach(line => {
       val macBrand = line.trim
@@ -175,6 +207,10 @@ object ConfInfoSet {
     })
   }
 
+  /**
+    * 初始化待处理的场景ID列表
+    * @param fileName 场景列表地址
+    */
   def initSceneIdMap(fileName: String): Unit = {
 
     Source.fromFile(fileName).getLines().foreach(line => {

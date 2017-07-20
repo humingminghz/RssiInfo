@@ -5,9 +5,9 @@ import com.palmap.rssi.statistic.ShopSceneFuncs
 import scala.collection.mutable
 
 /**
-*  Created on 2016/1/12.
+*  部分数据初始化
 *
-* @author lingling.dai
+* @author mingming.hu
 */
 object CommonConf {
   val machineSet: mutable.HashSet[String] = scala.collection.mutable.HashSet[String]()

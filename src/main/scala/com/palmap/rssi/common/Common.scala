@@ -1,5 +1,8 @@
 package com.palmap.rssi.common
 
+/**
+  * 通用类 By Mingming.Hu
+  */
 object Common {
 
     val MACHINE_SET_FILE = "machine_list"
@@ -19,12 +22,12 @@ object Common {
 
     val INTERVAL_MINUTE = 10  //分钟
     val MINUTE_FORMATTER = 60000
-    val DEFAULT_MACHINE_CHECK_MINUTE = 2 * 5
+    val DEFAULT_MACHINE_CHECK_MINUTE: Int = 2 * 5
     val NOW_MINUTE_FORMAT = "yyyy-MM-dd HH:mm:00"
     val NOW_HOUR_FORMAT = "yyyy-MM-dd HH:00:00"
     val TODAY_FIRST_TS_FORMAT = "yyyy-MM-dd 00:00:00"
-    val HOUR_FORMATTER = MINUTE_FORMATTER * 60
-    val DAY_FORMATTER = MINUTE_FORMATTER * 60 * 24
+    val HOUR_FORMATTER: Int = MINUTE_FORMATTER * 60
+    val DAY_FORMATTER: Int = MINUTE_FORMATTER * 60 * 24
     val DEFAULT_MACHINE_CHECK_TIMES = 1
 
     val ZK_MAP_MONITOR_PATH = "zk.map.monitor.path"

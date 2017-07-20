@@ -8,9 +8,8 @@ import scala.collection.mutable.ListBuffer
 
 
 /**
- * Created on 2016/2/22.
- *
- * @author fengchao.wang
+  *  mongoDB的connection类
+  *
  */
 object MongoFactory {
 
@@ -27,6 +26,9 @@ object MongoFactory {
 
   var mongo: MongoClient = _
 
+  /**
+    * 初始化mongoDB
+    */
   def init(): Unit = {
 
     if (host == null || host.isEmpty) {
@@ -68,6 +70,11 @@ object MongoFactory {
 
   val db: MongoDB = mongo.getDB(dbName)
 
+  /**
+    * 获取指定collection
+    * @param tableName collection 名称
+    * @return MongoCollection
+    */
   def getDBCollection(tableName: String): MongoCollection = {
     MongoFactory.db(tableName)
   }

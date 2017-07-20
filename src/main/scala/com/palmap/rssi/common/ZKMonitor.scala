@@ -9,10 +9,8 @@ import org.apache.curator.utils.EnsurePath
 
 
 /**
-*  Created on 2015/12/15.
-*
-* @author lingling.dai
-*/
+  * zookeeper相关类 被触发后跟新部分内存数据
+  */
 object ZKMonitor {
 
   val xmlConf: mutable.Map[String, String] = GeneralMethods.getConf(Common.SPARK_CONFIG)
@@ -37,6 +35,9 @@ object ZKMonitor {
     println(zkMapMonitorPath + " start zk monitor....")
   }
 
+  /**
+    * to be removed
+    */
   def updateSceneIdNodeCache(client: CuratorFramework, path: String): NodeCache = {
 
     val cache: NodeCache  = new NodeCache (client, path)
@@ -59,7 +60,7 @@ object ZKMonitor {
   }
 
   /**
-    * @author yuyingchao 20170515
+    * 接收新场景 添加至内存
     * @param client
     * @param path
     * @return
@@ -87,6 +88,12 @@ object ZKMonitor {
     cache
   }
 
+  /**
+    * 接收营业时间 更新至内存
+    * @param client
+    * @param path
+    * @return
+    */
   def confNodeCache(client: CuratorFramework, path: String): NodeCache = {
 
     val cache: NodeCache  = new NodeCache (client, path)
